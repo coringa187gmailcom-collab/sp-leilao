@@ -157,7 +157,8 @@ USER_COLS = {"email_verified": "INTEGER DEFAULT 0", "email_verified_at": "INTEGE
              "district": "TEXT", "city": "TEXT", "uf": "TEXT", "profile_at": "INTEGER",
              "rg": "TEXT", "totp_secret": "TEXT", "totp_enabled": "INTEGER DEFAULT 0", "totp_last": "INTEGER DEFAULT 0", "recovery_hashes": "TEXT DEFAULT '[]'"}
 LOT_COLS = {"auction_id": "INTEGER", "lot_number": "INTEGER", "conditions": "TEXT DEFAULT ''", "pickup": "TEXT DEFAULT ''",
-            "views": "INTEGER DEFAULT 0", "specs": "TEXT DEFAULT ''", "appraisal_cents": "INTEGER", "commission_pct": "REAL DEFAULT 5", "fees": "TEXT DEFAULT ''", "tags": "TEXT DEFAULT ''", "note": "TEXT DEFAULT ''"}
+            "views": "INTEGER DEFAULT 0", "specs": "TEXT DEFAULT ''", "appraisal_cents": "INTEGER", "commission_pct": "REAL DEFAULT 5", "fees": "TEXT DEFAULT ''", "tags": "TEXT DEFAULT ''", "note": "TEXT DEFAULT ''",
+            "hidden": "INTEGER DEFAULT 0"}
 AUC_COLS = {"start_ts": "INTEGER", "modality": "TEXT DEFAULT 'Online'", "edital": "TEXT DEFAULT ''", "ribbon": "TEXT DEFAULT ''"}
 MODALIDADES = ["Online", "Presencial", "Online e presencial"]
 V4_FEES = "Sem taxas administrativas (ambiente de teste)."
@@ -488,7 +489,7 @@ app.jinja_env.globals["site_img"] = site_img
 @app.get("/")
 def index():
     c = db(); t = now()
-    cats = {r[0]: r[1] for r in c.execute("SELECT category, COUNT(*) FROM lots WHERE status='open' GROUP BY category")}
+    cats = {r[0]: r[1] for r in c.execute("SELECT category, COUNT(*) FROM lots WHERE status='open' AND COALESCE(hidden,0)=0 GROUP BY category")}
     banners = c.execute("SELECT * FROM banners WHERE active=1 ORDER BY pos, id").fetchall()
     upcoming = c.execute(AUCQ + " WHERE nopen>0 ORDER BY end_ts LIMIT 8").fetchall()
     brows = banner_rows(c, banners, upcoming)
@@ -496,11 +497,11 @@ def index():
     for a in upcoming[:4]:
         lots = c.execute(LOTQ + " WHERE auction_id=? ORDER BY status='open' DESC, lot_number, id LIMIT 40", (a["id"],)).fetchall()
         if lots: sections.append((a, lots))
-    prox_lotes = c.execute(LOTQ + " WHERE status='open' ORDER BY COALESCE(auction_start,0)>? DESC, end_ts, lot_number, id LIMIT 24", (t,)).fetchall()
+    prox_lotes = c.execute(LOTQ + " WHERE status='open' AND COALESCE(hidden,0)=0 ORDER BY COALESCE(auction_start,0)>? DESC, end_ts, lot_number, id LIMIT 24", (t,)).fetchall()
     destaques = []
     for slug, label, ic, cs in GRUPOS:
         q = ",".join("?" * len(cs))
-        lots = c.execute(LOTQ + f" WHERE status='open' AND category IN ({q}) ORDER BY nb DESC, end_ts LIMIT 12", cs).fetchall()
+        lots = c.execute(LOTQ + f" WHERE status='open' AND COALESCE(hidden,0)=0 AND category IN ({q}) ORDER BY nb DESC, end_ts LIMIT 12", cs).fetchall()
         destaques.append((slug, label, ic, lots))
     return render_template("index.html", cats=cats, banners=banners, upcoming=upcoming, sections=sections,
                            destaques=destaques, prox_lotes=prox_lotes, brows=brows, favs=my_favs())
@@ -557,6 +558,9 @@ def lot_filters(a, extra_where="", extra_args=()):
     if lote: w.append("COALESCE(lot_number,id)=?"); args.append(int(lote))
     tag = (a.get("tag") or "").strip()[:24]
     if tag: w.append("(','||REPLACE(COALESCE(tags,''),', ',',')||',') LIKE ?"); args.append(f"%,{tag},%")
+    me = current_user()
+    if not me or not me["is_admin"]:
+        w.append("COALESCE(hidden,0)=0")
     mn, mx = parse_money(a.get("min")), parse_money(a.get("max"))
     if mn: w.append("price>=?"); args.append(mn)
     if mx: w.append("price<=?"); args.append(mx)
@@ -661,6 +665,7 @@ def lot(lid):
     l = c.execute("SELECT l.*, u.name seller_name, a.title auction_title, a.location auction_location, a.start_ts auction_start, a.modality auction_modality FROM lots l JOIN users u ON u.id=l.seller_id LEFT JOIN auctions a ON a.id=l.auction_id WHERE l.id=?", (lid,)).fetchone()
     if not l: abort(404)
     me = current_user()
+    if l["hidden"] and (not me or not me["is_admin"]): abort(404)
     hab = (not l["auction_id"]) or bool(me and c.execute("SELECT 1 FROM habilitations WHERE user_id=? AND auction_id=?", (me["id"], l["auction_id"])).fetchone())
     nhab = c.execute("SELECT COUNT(*) FROM habilitations WHERE auction_id=?", (l["auction_id"],)).fetchone()[0] if l["auction_id"] else None
     photos = [r["filename"] for r in c.execute("SELECT filename FROM photos WHERE lot_id=? ORDER BY pos", (lid,))]
