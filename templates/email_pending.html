@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block title %}Confirmação de e-mail · {{cfg.empresa}}{% endblock %}{% block body %}
+<div class="card pad" style="max-width:560px;margin:10px auto">
+{% if me.email_verified %}
+<h1 style="margin-top:0;font-size:1.5rem">E-mail confirmado ✅</h1><p>Seu e-mail <b>{{me.email}}</b> já está confirmado.</p>
+{% if not ficha_ok %}<p>Falta só completar sua ficha de cliente para se habilitar e dar lances.</p><a class="btn lg w" href="/minha-conta/ficha">Completar minha ficha</a>{% else %}<a class="btn lg w" href="/leiloes">Ver leilões</a>{% endif %}
+{% else %}
+<h1 style="margin-top:0;font-size:1.5rem">Confirmação de e-mail pendente</h1>
+{% if mode %}
+<p>Enviamos um link de confirmação para <b>{{me.email}}</b>. Abra o e-mail e toque em <b>“Confirmar meu e-mail”</b>. O link vale por 24 horas.</p>
+<p class="muted">Não chegou? Confira a caixa de spam/promoções ou peça um novo envio.</p>
+<form method="post" action="/confirmar-email/reenviar"><input type="hidden" name="csrf" value="{{csrf()}}"><button class="btn ghost">Reenviar e-mail</button></form>
+{% else %}
+<p>Sua conta foi criada com o e-mail <b>{{me.email}}</b>. A confirmação do seu cadastro está <b>pendente</b> e será feita pela equipe da {{cfg.empresa}}.</p>
+{% if cfg.whatsapp %}<p>Para agilizar, fale conosco pelo <a href="{{cfg.wa_link}}" target="_blank" rel="noopener">WhatsApp {{cfg.whatsapp}}</a>.</p>{% endif %}
+{% endif %}
+<div class="habbox" style="margin-top:16px">{% if ficha_ok %}✅ Sua ficha de cliente já está completa.{% else %}Enquanto isso, <b>complete sua ficha de cliente</b> (CPF, WhatsApp, nascimento e endereço) — ela também é obrigatória para se habilitar.<br><a class="btn hab w" style="margin-top:10px" href="/minha-conta/ficha">Completar minha ficha</a>{% endif %}</div>
+{% endif %}
+</div>{% endblock %}

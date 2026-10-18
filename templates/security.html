@@ -1,0 +1,60 @@
+{% extends "base.html" %}{% block body %}
+<div class="toolbar"><h1>Segurança e backups</h1><a class="btn ghost sm" href="/admin">← Administração</a></div>
+
+<div class="card pad" style="margin-bottom:18px">
+<h2 style="margin-top:0">Confirmação em dois passos (2FA)</h2>
+{% if codes %}
+<div class="card pad" style="border:2px solid #f59e0b;background:#fffbeb">
+<h3 style="margin-top:0">⚠️ Guarde estes códigos de recuperação AGORA</h3>
+<p>Eles só aparecem <b>esta vez</b>. Cada um funciona <b>uma única vez</b> no lugar do código do celular, caso você perca o aparelho. Imprima ou salve num local seguro (fora do celular).</p>
+<pre style="font-size:1.15rem;line-height:1.8;columns:2;background:#fff;padding:12px;border-radius:8px">{% for c in codes %}{{c}}
+{% endfor %}</pre>
+</div>
+{% endif %}
+{% if me2.totp_enabled %}
+<p><span class="badge" style="background:#16a34a;color:#fff">ATIVADA</span> Ao entrar, será pedido o código do app autenticador depois da senha. Códigos de recuperação restantes: <b>{{left}}</b>.</p>
+<details><summary class="btn ghost sm">Gerar novos códigos de recuperação / desativar</summary>
+<form method="post" style="max-width:420px;margin-top:12px"><input type="hidden" name="csrf" value="{{csrf()}}">
+<label>Sua senha</label><input type="password" name="senha" required>
+<label>Código atual do app (ou de recuperação)</label><input name="codigo" inputmode="numeric" required autocomplete="one-time-code">
+<p style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" name="acao" value="novoscodigos">Gerar novos códigos</button>
+<button class="btn ghost sm" name="acao" value="desativar2fa" onclick="return confirm('Desativar a confirmação em dois passos?')">Desativar 2FA</button></p></form></details>
+{% elif qr %}
+<ol style="line-height:1.7"><li>Instale no celular um app autenticador (Google Authenticator, Microsoft Authenticator ou Authy).</li>
+<li>No app, toque em <b>+</b> e escaneie o QR code abaixo. (Sem câmera? Escolha “inserir chave” e digite a chave manual.)</li>
+<li>Digite o código de 6 dígitos que aparecer no app e clique em <b>Confirmar e ativar</b>.</li></ol>
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center">
+<div style="background:#fff;padding:8px;border-radius:8px;border:1px solid #e5e7eb">{{qr}}</div>
+<div><p class="muted" style="margin:0">Chave manual:</p><code style="font-size:1.1rem;word-break:break-all">{{ secret }}</code>
+<form method="post" style="margin-top:12px"><input type="hidden" name="csrf" value="{{csrf()}}"><input type="hidden" name="acao" value="confirmar2fa">
+<label>Código do app</label><input name="codigo" inputmode="numeric" autocomplete="one-time-code" required maxlength="6" placeholder="000000" style="max-width:180px">
+<p><button class="btn">Confirmar e ativar</button></p></form></div></div>
+{% else %}
+<p><span class="badge" style="background:#9ca3af;color:#fff">DESATIVADA</span> Com o 2FA ativo, além da senha será pedido um código do seu celular — mesmo que alguém descubra a senha, não consegue entrar.</p>
+<form method="post"><input type="hidden" name="csrf" value="{{csrf()}}"><button class="btn" name="acao" value="iniciar2fa">Ativar confirmação em dois passos</button></form>
+{% endif %}
+</div>
+
+<div class="card pad" id="backups" style="margin-bottom:18px">
+<div class="toolbar" style="margin:0"><h2 style="margin:0">Backups</h2>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><form method="post"><input type="hidden" name="csrf" value="{{csrf()}}"><button class="btn ghost sm" name="acao" value="backup">Gerar backup agora</button></form>
+{% if backups %}<a class="btn sm" href="/admin/backup/ultimo">⬇ Baixar o mais recente</a>{% endif %}</div></div>
+<p class="muted">Backup automático diário do banco de dados e das fotos. São mantidos os 7 mais recentes.</p>
+{% if backups %}<div style="overflow-x:auto"><table><tr><th>Arquivo</th><th>Data</th><th>Tamanho</th><th></th></tr>
+{% for b in backups %}<tr><td><code>{{b.name}}</code></td><td>{{b.ts|dt}}</td><td>{{ '%.1f'|format(b.size/1048576) }} MB</td><td><a href="/admin/backup/{{b.name}}">baixar</a></td></tr>{% endfor %}</table></div>
+{% else %}<p>Nenhum backup ainda. O primeiro é gerado automaticamente em alguns minutos, ou clique em “Gerar backup agora”.</p>{% endif %}
+</div>
+
+<div class="card pad">
+<div class="toolbar" style="margin:0"><h2 style="margin:0">Tentativas de login</h2>
+{% if locks %}<form method="post"><input type="hidden" name="csrf" value="{{csrf()}}"><button class="btn ghost sm" name="acao" value="desbloquear">Remover bloqueios ativos</button></form>{% endif %}</div>
+<p class="muted">5 erros em 15 minutos (por IP ou por e-mail) bloqueiam o login por 15 minutos.</p>
+{% if locks %}<h3>Bloqueios ativos ({{locks|length}})</h3><div style="overflow-x:auto"><table><tr><th>Desde</th><th>Até</th><th>IP</th><th>E-mail</th></tr>
+{% for l in locks %}<tr><td>{{l.ts|dt}}</td><td>{{l.until_ts|dt}}</td><td>{{l.ip}}</td><td>{{l.email or '—'}}</td></tr>{% endfor %}</table></div>{% endif %}
+{% set K={'ok':'✅ Login ok','ok2fa':'✅ Login ok (2FA)','ok_recovery':'⚠️ Login com código de recuperação','fail':'❌ Senha errada','fail2fa':'❌ Código 2FA errado','lock':'⛔ Bloqueio','blocked':'⛔ Tentativa durante bloqueio','2fa_on':'🔒 2FA ativado','2fa_off':'🔓 2FA desativado','2fa_codes':'🔑 Novos códigos','2fa_reset_env':'🔓 2FA desativado via Railway','unlock_all':'🔓 Bloqueios removidos','backup_download':'⬇ Backup baixado'} %}
+<h3>Últimos eventos</h3>
+{% if logs %}<div style="overflow-x:auto"><table><tr><th>Quando</th><th>Evento</th><th>IP</th><th>E-mail</th></tr>
+{% for l in logs %}<tr><td>{{l.ts|dt}}</td><td>{{K.get(l.kind, l.kind)}}</td><td>{{l.ip}}</td><td>{{l.email or '—'}}</td></tr>{% endfor %}</table></div>
+{% else %}<p class="muted">Nenhum evento registrado.</p>{% endif %}
+</div>
+{% endblock %}

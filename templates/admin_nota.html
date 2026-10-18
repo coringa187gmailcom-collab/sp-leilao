@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% block title %}Nota {{num}} · Admin{% endblock %}{% block body %}
+{% macro inp(k, label, ph='') %}<div><label>{{label}}</label><input name="{{k}}" value="{{d.get(k) or ''}}" maxlength="200" placeholder="{{ph}}"></div>{% endmacro %}
+{% macro area(k, label, rows=3, hint='') %}<label>{{label}}{% if hint %} <span class="muted" style="font-weight:400">{{hint}}</span>{% endif %}</label><textarea name="{{k}}" rows="{{rows}}">{{d.get(k) or ''}}</textarea>{% endmacro %}
+<div class="crumb"><a href="/admin">Admin</a> › <a href="/admin/notas">Notas</a> › {{num}}</div>
+<div class="toolbar"><div><h1 style="margin-bottom:4px">Nota de Arrematação nº {{num}}</h1>
+<span class="muted">Lote <a href="/lote/{{lot.id}}">#{{lot.id}} · {{lot.title}}</a> · Cliente <a href="/admin/cliente/{{cli.id}}">{{cli.name}}</a> · <span class="nst {{n.status}}">{{n.status}}</span>{% if n.sent_at %} · enviada por e-mail em {{n.sent_at|dm}}{% if n.sent_count>1 %} ({{n.sent_count}}×){% endif %}{% endif %}</span></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn ghost sm" href="/nota/{{n.id}}" target="_blank">Visualizar</a><a class="btn ghost sm" href="/nota/{{n.id}}.pdf" target="_blank">PDF</a><a class="btn sm" href="/nota/{{n.id}}.pdf?baixar=1">Baixar PDF</a>
+{% if mode %}<form method="post" onsubmit="return confirm('Enviar a nota {{num}} em PDF para {{d.arr_email}}?\n\nConfira os valores antes: o e-mail sai imediatamente.')"><input type="hidden" name="csrf" value="{{csrf()}}"><button class="btn sm" name="acao" value="enviar" style="background:var(--go)">✉ Enviar por e-mail ao arrematante</button></form>{% endif %}</div></div>
+{% if lot.winner_id != cli.id %}<div class="flash warn">Atenção: este cliente não é o vencedor registrado do lote (nota gerada manualmente).</div>{% endif %}
+<div class="notagrid">
+<form method="post" class="card pad notaform"><input type="hidden" name="csrf" value="{{csrf()}}"><input type="hidden" name="acao" value="salvar">
+<div class="row2"><div><label>Situação</label><select name="status">{% for s in NOTA_STATUS %}<option {{'selected' if s==n.status}}>{{s}}</option>{% endfor %}</select></div><div><label>Total calculado</label><input value="{{t.total|brl}}" disabled style="font-weight:800"></div></div>
+<h3>Valores</h3>
+<div class="row2"><div><label>Lance vencedor (R$)</label><input name="lance" inputmode="decimal" value="{{'%.2f'|format(t.lance/100)|replace('.',',')}}"></div><div><label>Comissão do leiloeiro (%)</label><input name="comissao_pct" inputmode="decimal" value="{{('%g' % t.pct)|replace('.',',')}}"></div></div>
+<div class="row2"><div><label>Taxa administrativa (R$)</label><input name="taxa_adm" inputmode="decimal" value="{{'%.2f'|format(t.adm/100)|replace('.',',')}}"></div><div><label>Multa por não pagamento (%)</label><input name="multa_pct" inputmode="decimal" value="{{('%g' % d.multa_pct)|replace('.',',')}}"></div></div>
+<div class="row2"><div><label>Taxa de pátio — diárias</label><input name="patio_diarias" inputmode="numeric" value="{{d.patio_diarias or 0}}"></div><div><label>Valor da diária (R$)</label><input name="patio_valor" inputmode="decimal" value="{{'%.2f'|format((d.patio_valor or 0)/100)|replace('.',',')}}"></div></div>
+<label>Outras despesas (opcional)</label>{% for i in range(3) %}{% set o = d.outras[i] if d.outras and d.outras|length>i else {} %}<div class="row2" style="margin-bottom:6px"><input name="outra_desc_{{i}}" value="{{o.desc or ''}}" placeholder="Descrição (ex.: Taxa de remoção)" maxlength="80"><input name="outra_valor_{{i}}" inputmode="decimal" value="{{('%.2f'|format(o.valor/100)|replace('.',',')) if o.valor else ''}}" placeholder="R$"></div>{% endfor %}
+<p class="muted" style="margin:4px 0 0">Comissão = {{('%g' % t.pct)|replace('.',',')}}% × lance = <b>{{t.com|brl}}</b> · Pátio = <b>{{t.pat|brl}}</b> · <b>Total {{t.total|brl}}</b> (recalculado no servidor ao salvar)</p>
+<h3>Leilão e lote</h3>
+<div class="row2">{{inp('leilao_num','Leilão nº')}}{{inp('lote_num','Lote nº')}}</div><div class="row2">{{inp('leilao_data','Data')}}{{inp('modalidade','Modalidade')}}</div>{{inp('comitente','Comitente (opcional)')}}
+{{area('descricao','Descrição do bem',4)}}
+<h3>Arrematante</h3>
+{{inp('arr_nome','Nome')}}<div class="row2">{{inp('arr_cpf','CPF')}}{{inp('arr_rg','RG (opcional)')}}</div>{{area('arr_endereco','Endereço',2)}}<div class="row2">{{inp('arr_whatsapp','WhatsApp')}}{{inp('arr_email','E-mail (usado no envio)')}}</div>
+<h3>Pagamento</h3>
+{{inp('prazo_pagamento','Prazo de pagamento','48 horas úteis após o leilão')}}<div class="row2">{{inp('pix','Chave PIX (gera QR Code com o total)')}}{{inp('favorecido','Favorecido')}}</div><div class="row2">{{inp('banco','Banco')}}{{inp('agencia_conta','Agência / Conta')}}</div>
+<h3>Retirada</h3>
+{{inp('retirada_local','Local')}}<div class="row2">{{inp('retirada_horarios','Horários')}}{{inp('prazo_retirada','Prazo')}}</div>{{area('levar','Levar na retirada',3,'(um item por linha)')}}
+<h3>Textos</h3>
+{{area('documentacao','Documentação após o pagamento',4,'(um item por linha)')}}{{area('condicoes','Condições gerais',4,'(um item por linha)')}}{{area('observacoes','Observações (opcional)',3)}}
+<h3>Empresa (cabeçalho)</h3>
+<div class="row2">{{inp('emp_razao','Razão social')}}{{inp('emp_cnpj','CNPJ')}}</div><div class="row2">{{inp('emp_leiloeiro','Leiloeiro oficial')}}{{inp('emp_jucesp','JUCESP nº')}}</div><div class="row2">{{inp('emp_contato','Contato')}}{{inp('emp_cidade','Cidade/UF')}}</div>{{inp('emp_site','Site')}}
+<div class="savebar"><button class="btn lg">Salvar nota</button></div></form>
+<div class="card notaprev"><div class="pvh"><b>Pré-visualização</b><span class="muted">atualiza ao salvar</span></div><iframe src="/nota/{{n.id}}?embed=1&v={{n.updated_at}}" title="Pré-visualização da nota" loading="lazy"></iframe></div>
+</div>
+<form method="post" style="margin-top:14px" onsubmit="return confirm('Regenerar a nota com os dados atuais do lote, do cliente e de Dados da empresa?\n\nAs edições feitas nesta nota serão DESCARTADAS (número e situação são mantidos).')"><input type="hidden" name="csrf" value="{{csrf()}}"><button class="btn ghost sm" name="acao" value="regenerar">↻ Regenerar com dados atuais (descarta edições)</button></form>
+{% endblock %}

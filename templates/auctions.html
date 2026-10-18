@@ -1,0 +1,5 @@
+{% extends "base.html" %}{% from "_m.html" import auction_card with context %}{% block title %}Leilões · SP Leilões{% endblock %}{% block body %}
+<div class="toolbar"><div><h1>Leilões</h1><span class="muted">Eventos com data de abertura e encerramento que reúnem vários lotes.</span></div><div class="actions"><a class="btn ghost sm" href="/agenda">{{icon('calendar',15)}} Agenda</a>{% if me and me.is_admin %}<a class="btn sm" href="/leiloes/novo">+ Criar leilão</a>{% endif %}</div></div>
+{% if open_ %}<div class="agrid2">{% for a in open_ %}{{auction_card(a)}}{% endfor %}</div>{% else %}<div class="card empty">Nenhum leilão em andamento.</div>{% endif %}
+{% if closed %}<div class="sec"><div class="sech"><h2>Leilões encerrados</h2></div><div class="agrid2">{% for a in closed %}{{auction_card(a)}}{% endfor %}</div></div>{% endif %}
+{% endblock %}

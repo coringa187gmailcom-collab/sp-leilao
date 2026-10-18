@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% from "_m.html" import lot_card, filters, sorter with context %}{% block title %}{{a.title}} · SP Leilões{% endblock %}{% block body %}{% set st = astatus(a) %}
+<div class="crumb"><a href="/">Início</a> › <a href="/leiloes">Leilões</a> › <span>Leilão nº {{auc_code(a)}}</span></div>
+<section class="card ahead"><div class="cv">{% if a.cover %}<img src="/uploads/{{a.cover}}" alt="">{% endif %}</div>
+<div class="pad"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="bd inline {{st[1]}}">{{st[0]}}</span><span class="tag">{{icon('gavel',13)}} {{a.modality or 'Online'}}</span><span class="tag">Leilão nº {{auc_code(a)}}</span></div>
+<h1 style="margin:10px 0 4px;font-size:1.55rem;letter-spacing:-.02em">{{a.title}}</h1>
+<div class="muted">{% if cfg.leiloeiro_nome %}Leiloeiro oficial: {{cfg.leiloeiro_nome}}{% if cfg.leiloeiro_matricula %} (JUCESP nº {{cfg.leiloeiro_matricula}}){% endif %}{% else %}Realização: {{cfg.empresa}}{% endif %}</div>
+<div class="infogrid"><div><span>Abertura</span><b>{{a.start_ts|dm}}</b></div><div><span>Encerra a partir de</span><b>{{a.end_ts|dm}}</b></div><div><span>Modalidade</span><b>{{a.modality or 'Online'}}</b></div>
+<div><span>Lotes</span><b>{{a.nlots}}</b></div><div><span>Habilitados</span><b>{{a.nhab}}</b></div><div><span>Visitas</span><b>{{a.nviews}}</b></div></div>
+{% if st[1]=='upcoming' %}<div class="muted">Abre para lances em</div><div class="cdbig" data-end="{{a.start_ts}}"></div>{% elif a.nopen and a.next_end %}<div class="muted">Próximo lote encerra em</div><div class="cdbig" data-end="{{a.next_end}}"></div>{% endif %}
+<div class="actions">{% if a.nopen %}{% if hab %}<span class="lead">{{icon('check',16)}} Você está habilitado</span>{% else %}<a class="btn hab" href="/leilao/{{a.id}}/habilitar">{{icon('shield',16)}} Habilite-se para este leilão</a>{% endif %}{% endif %}
+<a class="btn ghost" href="/leilao/{{a.id}}/edital">{{icon('box',16)}} Edital do leilão</a>
+{% if me and me.is_admin %}{% if a.end_ts > server_now + 120 %}<a class="btn sm" href="/lote/novo?leilao={{a.id}}">+ Adicionar lote</a>{% endif %}<a class="btn ghost sm" href="/admin/leilao/{{a.id}}/editar">Editar leilão</a>{% endif %}</div>
+</div></section>
+{% if a.description or a.location %}<div class="card pad" style="margin-top:16px"><h3 style="margin-top:0">Sobre o leilão</h3><p style="white-space:pre-wrap;margin:0">{{a.description}}</p>{% if a.location %}<p class="muted" style="margin-bottom:0">{{icon('pin',14)}} Local de retirada/visitação: {{a.location}}</p>{% endif %}
+<p class="muted" style="font-size:.8rem;margin-bottom:0">Os lotes encerram em sequência, de 2 em 2 minutos. Lance nos últimos 2 minutos prorroga aquele lote em 2 minutos.</p></div>{% endif %}
+<div class="toolbar" style="margin-top:22px"><h2 style="margin:0">Lotes deste leilão ({{lots|length}})</h2>{{sorter(f,'/leilao/'~a.id,[('numero','Nº do lote')])}}</div>
+<div class="layout">{{filters(f,'/leilao/'~a.id)}}
+<div>{% if lots %}<div class="grid">{% for l in lots %}{{lot_card(l, favs)}}{% endfor %}</div>{% else %}<div class="card empty">Nenhum lote{% if f.ordem!='numero' %} com esses filtros{% endif %}.</div>{% endif %}</div></div>
+{% endblock %}

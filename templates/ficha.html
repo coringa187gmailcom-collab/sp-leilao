@@ -1,0 +1,34 @@
+{% extends "base.html" %}{% block title %}Minha ficha · {{cfg.empresa}}{% endblock %}{% block body %}
+<div class="card pad" style="max-width:720px;margin:0 auto">
+<h1 style="margin-top:0;font-size:1.5rem;letter-spacing:-.02em">Ficha do cliente</h1>
+<p class="muted">Obrigatória para se habilitar nos leilões. Seus dados são usados só para identificação, contato sobre arremates e documentos de venda, e ficam visíveis apenas para a administração. <a href="/condicoes#privacidade" target="_blank">Política de privacidade</a>.</p>
+<form method="post" autocomplete="on"><input type="hidden" name="csrf" value="{{csrf()}}"><input type="hidden" name="next" value="{{nxt}}">
+<label>Nome completo</label><input name="nome" required minlength="5" maxlength="120" autocomplete="name" value="{{f.get('nome','')}}">
+<div class="row2"><div><label>CPF</label><input name="cpf" id="cpf" required inputmode="numeric" maxlength="14" placeholder="000.000.000-00" value="{{f.get('cpf','')}}"></div>
+<div><label>Data de nascimento</label><input name="nascimento" type="date" required autocomplete="bday" value="{{f.get('nascimento','')}}"></div></div><label>RG (opcional — aparece na nota de arrematação)</label><input name="rg" maxlength="25" value="{{f.get('rg','')}}" placeholder="00.000.000-0 SSP/SP">
+<label>WhatsApp com DDD</label><input name="whatsapp" id="wa" required inputmode="tel" autocomplete="tel-national" maxlength="16" placeholder="(11) 98765-4321" value="{{f.get('whatsapp','')}}">
+<h3 style="margin:22px 0 0">Endereço</h3>
+<div class="row2"><div><label>CEP</label><input name="cep" id="cep" required inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" value="{{f.get('cep','')}}"><small class="muted" id="cepmsg">Digite o CEP para preencher o endereço.</small></div><div></div></div>
+<label>Rua / logradouro</label><input name="rua" id="rua" required autocomplete="address-line1" value="{{f.get('rua','')}}">
+<div class="row2"><div><label>Número</label><input name="numero" id="numero" required maxlength="20" placeholder="Ex.: 123 ou S/N" value="{{f.get('numero','')}}"></div>
+<div><label>Complemento (opcional)</label><input name="complemento" maxlength="80" autocomplete="address-line2" placeholder="Apto, bloco…" value="{{f.get('complemento','')}}"></div></div>
+<label>Bairro</label><input name="bairro" id="bairro" required value="{{f.get('bairro','')}}">
+<div class="row2"><div><label>Cidade</label><input name="cidade" id="cidade" required autocomplete="address-level2" value="{{f.get('cidade','')}}"></div>
+<div><label>Estado (UF)</label><select name="uf" id="uf" required><option value="">Selecione</option>{% for u in UFS %}<option {{'selected' if f.get('uf')==u}}>{{u}}</option>{% endfor %}</select></div></div>
+<label style="font-weight:400;display:flex;gap:8px;align-items:flex-start;margin-top:14px"><input type="checkbox" required style="width:auto;margin-top:4px"> <span>Declaro que os dados são verdadeiros e que tenho 18 anos ou mais.</span></label>
+<p><button class="btn lg w">Salvar ficha</button></p></form></div>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+function mask(el,fn){el.addEventListener('input',()=>{el.value=fn(el.value.replace(/\D/g,''))})}
+mask($('cpf'),d=>{d=d.slice(0,11);return d.replace(/^(\d{3})(\d)/,'$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1-$2')});
+mask($('wa'),d=>{if(d.length>11&&d.startsWith('55'))d=d.slice(2);d=d.slice(0,11);if(d.length<3)return d.length?'('+d:'';const n=d.slice(2),p=n.length>8?5:4;return '('+d.slice(0,2)+') '+(n.length>p?n.slice(0,p)+'-'+n.slice(p):n)});
+mask($('cep'),d=>{d=d.slice(0,8);return d.length>5?d.slice(0,5)+'-'+d.slice(5):d});
+let last='';
+$('cep').addEventListener('input',async()=>{const d=$('cep').value.replace(/\D/g,'');if(d.length!==8||d===last)return;last=d;const m=$('cepmsg');m.textContent='Buscando endereço…';
+ try{const r=await fetch('https://viacep.com.br/ws/'+d+'/json/');const j=await r.json();if(j.erro)throw 0;
+  if(j.logradouro)$('rua').value=j.logradouro;if(j.bairro)$('bairro').value=j.bairro;if(j.localidade)$('cidade').value=j.localidade;if(j.uf)$('uf').value=j.uf;
+  m.textContent='Endereço preenchido. Confira e informe o número.';$('numero').focus();}
+ catch(e){m.textContent='CEP não encontrado — preencha o endereço manualmente.'}});
+})();
+</script>{% endblock %}

@@ -1,0 +1,110 @@
+{% extends "base.html" %}{% from "_m.html" import lot_card with context %}{% block title %}{{l.title}} · SP Leilões{% endblock %}{% block bodycls %}haslot{% endblock %}
+{% block head %}{% set sh = lot_share(l, st.current) %}<meta property="og:type" content="product"><meta property="og:site_name" content="{{cfg.empresa}}"><meta property="og:title" content="{{sh.title}}"><meta property="og:description" content="{{sh.desc}}"><meta property="og:url" content="{{sh.url}}">{% if photos %}<meta property="og:image" content="{{base_url()}}/uploads/{{photos[0]}}"><meta property="og:image:alt" content="{{l.title}}"><meta name="twitter:card" content="summary_large_image">{% endif %}<link rel="canonical" href="{{sh.url}}">{% endblock %}
+{% block body %}{% set b = badge(l) %}
+<div class="crumb"><a href="/">Início</a> › {% if l.auction_id %}<a href="/leiloes">Leilões</a> › <a href="/leilao/{{l.auction_id}}">Leilão nº {{'%04d'|format(l.auction_id)}}</a>{% else %}<a href="/lotes">Lotes</a>{% endif %} › <span>Lote {{lotno(l)}}</span></div>
+<div class="lhead">{% if l.auction_id %}<span><b style="color:var(--ink)">Leilão nº {{'%04d'|format(l.auction_id)}} · Lote {{lotno(l)}}</b></span><span>{{icon('gavel',14)}} {{l.auction_modality or 'Online'}}</span>{% else %}<span><b style="color:var(--ink)">Lote avulso {{lotno(l)}}</b></span>{% endif %}
+<span>{{icon('search',14)}} {{l.views or 0}} visitas</span><span>{{icon('check',14)}} <span id="nb3">{{st.nbids}}</span> lances</span>{% if nhab is not none %}<span>{{icon('shield',14)}} {{nhab}} habilitados</span>{% endif %}<span>{{icon('heart',14)}} {{nfav}} favoritos</span></div>
+{% if nav %}<nav class="lnav" aria-label="Navegar entre lotes">{% if nav.prev %}<a href="/lote/{{nav.prev}}" rel="prev">{{icon('left',16)}} Anterior</a>{% else %}<span class="off">{{icon('left',16)}} Anterior</span>{% endif %}
+<a href="/leilao/{{l.auction_id}}">Lotes <small>({{nav.pos}} de {{nav.total}})</small></a>
+{% if nav.next %}<a href="/lote/{{nav.next}}" rel="next">Próximo {{icon('right',16)}}</a>{% else %}<span class="off">Próximo {{icon('right',16)}}</span>{% endif %}</nav>{% endif %}
+<div class="lot"><div>
+ <div class="gal">{% if photos %}<div class="main" onclick="openLb()"><img id="mi" src="/uploads/{{photos[0]}}" alt="{{l.title}}"><span class="bd {{b[1]}}">{{b[0]}}</span><span class="zoom">{{icon('search',14)}} Ampliar</span></div>
+ {% if photos|length > 1 %}<div class="thumbs">{% for p in photos %}<img src="/uploads/{{p}}" class="{{'on' if loop.first}}" onclick="setImg({{loop.index0}})" alt="">{% endfor %}</div>{% endif %}
+ {% else %}<div class="main" style="display:grid;place-items:center;color:var(--m)">Sem fotos</div>{% endif %}</div>
+ <div class="card pad" style="margin-top:18px">
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="tag">{{icon(CAT_ICON.get(l.category,'box'),13)}} {{l.category}}</span><span class="tag">Lote {{lotno(l)}}</span></div>{% if l.tags or l.note %}<div class="ltags">{% for t in tag_list(l.tags) %}<span>{{t}}</span>{% endfor %}{% if l.note %}<span style="border-color:var(--line);color:var(--m)">{{l.note}}</span>{% endif %}</div>{% endif %}
+  <h1>{{l.title}}</h1>
+  <div class="tabs" role="tablist"><button class="on" data-t="desc">Descrição</button><button data-t="ficha">Ficha técnica</button><button data-t="cond">Condições de venda</button><button data-t="ret">Retirada e visitação</button><button data-t="docs">Documentos</button><button data-t="hist">Lances (<span id="nb2">{{st.nbids}}</span>)</button></div>
+  <div class="tabpane on" id="t-desc">{{l.description or 'Sem descrição.'}}</div>
+  {% set sp = parse_specs(l.specs) %}<div class="tabpane" id="t-ficha" style="white-space:normal">{% if sp %}<table class="spec">{% for k,v in sp %}<tr><td>{{k}}</td><td><b>{{v}}</b></td></tr>{% endfor %}<tr><td>Categoria</td><td><b>{{l.category}}</b></td></tr></table>{% else %}<p class="muted">Ficha técnica não informada. Categoria: {{l.category}}.</p>{% endif %}</div>
+  <div class="tabpane" id="t-docs" style="white-space:normal"><div class="docs">{% if l.auction_id %}<a href="/leilao/{{l.auction_id}}/edital"><span class="dk">{{icon('box',18)}}</span> Edital do leilão</a>{% endif %}
+  <a href="#" onclick="window.print();return false"><span class="dk">{{icon('search',18)}}</span> Imprimir ficha do lote</a>
+  <a href="{{lot_share(l, st.current).wa}}" target="_blank" rel="noopener"><span class="dk">{{icon('phone',18)}}</span> Compartilhar no WhatsApp</a>
+  <a href="/condicoes"><span class="dk">{{icon('shield',18)}}</span> Condições gerais de venda</a></div></div>
+  <div class="tabpane" id="t-cond">{{l.conditions}}
+<b>Comissão do leiloeiro:</b> {{'%g'|format(l.commission_pct or 0)|replace('.',',')}}% sobre o valor arrematado.
+<b>Taxas:</b> {{l.fees}}
+<b>Regras do lance:</b> lance mínimo = lance atual + incremento ({{l.inc_cents|brl}}). Lance dado nos últimos 2 minutos prorroga o encerramento em 2 minutos. Ao encerrar, vence o maior lance.</div>
+  <div class="tabpane" id="t-ret">{{l.pickup}}{% if l.auction_location %}
+<b>Local:</b> {{l.auction_location}}{% endif %}</div>
+  <div class="tabpane" id="t-hist" style="white-space:normal"><table><thead><tr><th>Usuário</th><th>Valor</th><th>Data/hora</th></tr></thead><tbody id="hist">
+  {% for x in bids %}<tr class="{{'top' if loop.first}}"><td>{{x.user}}</td><td>{{x.amount}}</td><td class="muted">{{x.at}}{% if x.ext %} · ⏱ +2 min{% endif %}</td></tr>{% else %}<tr><td colspan="3" class="muted">Nenhum lance ainda. Seja o primeiro!</td></tr>{% endfor %}</tbody></table></div>
+ </div>
+</div>
+<div class="panel" id="lance"><div class="card">
+ <div style="display:flex;justify-content:space-between;align-items:center"><span class="bd inline {{b[1]}}" id="bdg">{{b[0]}}</span>
+ <button class="fav {{'on' if is_fav}}" id="favb" style="position:static" title="Favoritar" onclick="toggleFav()">{{icon('heart',18)}}</button></div>
+ <div id="st-open" {% if l.status!='open' %}style="display:none"{% endif %}>
+  <div class="lbl" style="margin-top:12px" id="lbl">{{'Lance atual' if st.current else 'Lance inicial'}}</div>
+  <div class="bigprice" id="cur">{{(st.current or l.start_cents)|brl}}</div>
+  {% if l.commission_pct %}<div class="calc">+ comissão {{'%g'|format(l.commission_pct)|replace('.',',')}}% = <b id="tot">{{((st.current or l.start_cents) * (1 + l.commission_pct/100))|round|int|brl}}</b></div>{% endif %}
+  <div class="muted"><span id="nb">{{st.nbids}}</span> lance(s) · líder: <b id="lead">{{st.leader or '—'}}</b></div>
+  {% if upcoming %}<div class="muted" style="margin-top:10px">Abre para lances em</div><div class="cdbig" data-end="{{l.auction_start}}"></div>{% endif %}
+  <div class="cdbig" id="cd" data-end="{{l.end_ts}}" {% if upcoming %}style="display:none"{% endif %}></div>
+  <div class="muted" style="text-align:center;margin-top:-6px">Encerra a partir de <b id="endat">{{l.end_ts|dt}}</b></div>
+  <div class="lead" id="youlead" style="margin-top:12px;display:{{'flex' if me and st.leader_id==me.id else 'none'}}">{{icon('check',18)}} Você tem o maior lance!</div>
+  {% if me and me.is_admin %}<p class="muted" style="margin-top:14px">Você é o administrador — acompanhe os lances aqui.</p><a class="btn ghost sm" href="/admin/lote/{{l.id}}/editar">Editar lote</a>
+  {% elif upcoming %}<div class="habbox">Este leilão abre para lances em {{l.auction_start|dt}}. {% if me and not hab %}<a href="/leilao/{{l.auction_id}}/habilitar?next=/lote/{{l.id}}">Habilite-se desde já</a>.{% elif not me %}<a href="/entrar?next=/lote/{{l.id}}">Entre</a> ou <a href="/cadastro">cadastre-se</a> para se habilitar desde já.{% endif %}</div>
+  {% elif me and gt %}<div class="habbox"><b>Falta pouco para dar lances</b><br><span class="muted">{{gt[0]}}</span><br><a class="btn hab w" style="margin-top:10px" href="{{gt[1]}}">{{icon('shield',16)}} {{'Confirmar e-mail' if 'e-mail' in gt[0] else 'Completar minha ficha'}}</a></div>
+  {% elif me and not hab %}<div class="habbox"><b>Habilitação necessária</b><br><span class="muted">Para dar lances neste leilão, leia o edital e habilite-se. É grátis e imediato.</span><br>
+   <a class="btn hab w" style="margin-top:10px" href="/leilao/{{l.auction_id}}/habilitar?next=/lote/{{l.id}}">{{icon('shield',16)}} Habilite-se para dar lances</a></div>
+  {% elif me %}<form id="bf" method="post" action="/lote/{{l.id}}/lance" style="margin-top:14px"><input type="hidden" name="csrf" value="{{csrf()}}">
+   <div class="lbl">Lance rápido</div><div class="quick" id="quick"></div>
+   <label style="margin-top:6px">Seu lance (mínimo <span id="mn">{{st.min_next|brl}}</span>)</label>
+   <div class="bidrow"><input id="val" name="valor" inputmode="decimal" value="{{'%.2f'|format(st.min_next/100)|replace('.',',')}}"><button class="btn">{{icon('gavel',18)}} Dar lance</button></div>
+   <div id="bmsg" style="margin-top:10px"></div></form>
+  {% else %}<a class="btn w lg" style="margin-top:14px" href="/entrar?next=/lote/{{l.id}}">Entrar para dar lance</a><a class="btn hab w" style="margin-top:8px" href="/cadastro">Habilite-se (cadastro grátis)</a><p class="muted" style="text-align:center">Não tem conta? <a href="/cadastro">Cadastre-se</a></p>{% endif %}
+ </div>
+ {% set sh = lot_share(l, st.current) %}<div class="shbar"><a class="btn wa w" href="{{sh.wa}}" target="_blank" rel="noopener">{{wa_svg(18,'#fff')}} Compartilhar no WhatsApp</a>
+<button type="button" class="btn ghost w" id="nshare" hidden data-title="{{sh.title}}" data-text="{{sh.desc}}" data-url="{{sh.url}}">{{icon('right',16)}} Compartilhar</button></div>
+<script>(()=>{const b=document.getElementById('nshare');if(navigator.share&&b){b.hidden=false;b.onclick=()=>navigator.share({title:b.dataset.title,text:b.dataset.text,url:b.dataset.url}).catch(()=>{})}})()</script>
+<div id="st-closed" {% if l.status=='open' %}style="display:none"{% endif %}>
+  <h2 style="margin:14px 0 4px">Leilão encerrado</h2><div class="muted">Encerrado em {{l.closed_at|dt}}</div>
+  {% if l.status!='open' %}{% if winner %}<div class="win">{{icon('trophy',28)}}<div>Vencedor: <b>{{winner.name|short}}</b><br>Arrematado por <b>{{l.final_cents|brl}}</b></div></div>
+   {% if me and me.id==l.winner_id %}<div class="lead">🎉 Parabéns, você arrematou este lote!</div>{% for nt in notas_lot if nt.user_id==me.id %}<p><a class="btn" href="/nota/{{nt.id}}">🧾 Ver minha nota de arrematação nº {{nota_num(nt)}}</a></p>{% endfor %}{% endif %}
+   {% if me and me.is_admin %}<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">{% for nt in notas_lot %}<a class="btn sm" href="/admin/nota/{{nt.id}}">🧾 Nota {{nota_num(nt)}} ({{nt.status}})</a>{% endfor %}{% if not notas_lot %}<form method="post" action="/admin/notas/gerar"><input type="hidden" name="csrf" value="{{csrf()}}"><input type="hidden" name="lote" value="{{l.id}}"><button class="btn sm">🧾 Gerar nota de arrematação</button></form>{% endif %}</div>{% endif %}
+   {% if me and me.id==l.winner_id %}<p class="muted">A SP Leilões vai entrar em contato pelo e-mail/telefone do seu cadastro para combinar pagamento e retirada.</p>{% endif %}
+   {% if me and me.is_admin %}<div class="card pad" style="margin-top:10px;box-shadow:none"><b>Contato do vencedor (só admin)</b><br>{{winner.name}} · {{winner.email}} {{winner.phone|phone}}<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><a class="btn sm" href="/admin/cliente/{{winner.id}}">Ficha do cliente</a>{% if winner.phone|wa %}<a class="btn sm wa" href="{{winner.phone|wa('Olá, ' ~ (winner.name|short) ~ '! Aqui é da ' ~ cfg.empresa ~ '. Você arrematou o lote ' ~ l.title ~ '. Vamos combinar pagamento e retirada?')}}" target="_blank" rel="noopener">WhatsApp</a>{% endif %}</div></div>{% endif %}
+  {% else %}<p>Encerrado sem lances.</p>{% endif %}{% endif %}
+ </div>
+ <div style="margin-top:16px"><div class="kv"><span>Lance inicial</span><b>{{l.start_cents|brl}}</b></div>{% if l.appraisal_cents %}<div class="kv"><span>Avaliação</span><b>{{l.appraisal_cents|brl}}</b></div>{% endif %}<div class="kv"><span>Incremento mínimo</span><b>{{l.inc_cents|brl}}</b></div>
+ <div class="kv"><span>Comissão do leiloeiro</span><b>{{'%g'|format(l.commission_pct or 0)|replace('.',',')}}%</b></div>{% if l.auction_id %}<div class="kv"><span>Abertura</span><b>{{l.auction_start|dm}}</b></div>{% endif %}
+ <div class="kv"><span>Vendedor</span><b>{{cfg.empresa}}</b></div><div class="kv"><span>Visitas</span><b>{{l.views or 0}}</b></div><div class="kv"><span>Favoritado por</span><b><span id="nfav">{{nfav}}</span> pessoa(s)</b></div></div>
+ <p class="muted" style="font-size:.78rem;margin:12px 0 0">{{icon('shield',14)}} Lance nos últimos 2 min prorroga o encerramento em 2 min. Lances são irrevogáveis.</p>
+</div></div></div>
+{% if related %}<section class="sec related"><div class="sech"><h2>{{'Outros lotes deste leilão' if l.auction_id else 'Lotes parecidos'}}</h2></div><div class="grid">{% for r in related %}{{lot_card(r, favs)}}{% endfor %}</div></section>{% endif %}
+{% if me and me.is_admin %}<form method="post" action="/lote/{{l.id}}/remover" onsubmit="return confirm('Admin: remover lote e lances?')" style="margin-top:16px"><input type="hidden" name="csrf" value="{{csrf()}}"><button class="btn red sm">Admin: remover lote</button> <a class="btn ghost sm" href="/admin/lote/{{l.id}}/editar">Admin: editar lote</a></form>{% endif %}
+{% if l.status=='open' %}<div class="mbar"><div><div class="lbl">Lance atual</div><b id="mcur" style="font-size:1.15rem">{{(st.current or l.start_cents)|brl}}</b> · <span class="cd" data-end="{{l.end_ts}}" id="mcd"></span></div><a class="btn" href="#lance">Dar lance</a></div>{% endif %}
+<div class="lb" id="lb" onclick="if(event.target===this)closeLb()"><button class="x" onclick="closeLb()">{{icon('x',22)}}</button>{% if photos|length>1 %}<button class="pv" onclick="step(-1)">{{icon('left',24)}}</button><button class="nx" onclick="step(1)">{{icon('right',24)}}</button>{% endif %}<img id="lbi" alt=""></div>
+{% endblock %}
+{% block scripts %}<script>
+const COM={{l.commission_pct or 0}},LID={{l.id}},PH={{photos|tojson}},INC={{l.inc_cents}},LOGGED={{'true' if me else 'false'}},CSRF="{{csrf()}}";let STATUS="{{l.status}}",IDX=0,MIN={{st.min_next}};
+const brl=c=>"R$ "+(c/100).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+function setImg(i){IDX=(i+PH.length)%PH.length;document.getElementById("mi").src="/uploads/"+PH[IDX];document.querySelectorAll(".thumbs img").forEach((t,k)=>t.classList.toggle("on",k===IDX));document.getElementById("lbi").src="/uploads/"+PH[IDX]}
+function openLb(){if(!PH.length)return;setImg(IDX);document.getElementById("lb").classList.add("on")}function closeLb(){document.getElementById("lb").classList.remove("on")}
+function step(d){setImg(IDX+d)}document.addEventListener("keydown",e=>{if(!document.getElementById("lb").classList.contains("on"))return;if(e.key==="Escape")closeLb();if(e.key==="ArrowLeft")step(-1);if(e.key==="ArrowRight")step(1)});
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x===b));document.querySelectorAll(".tabpane").forEach(p=>p.classList.toggle("on",p.id==="t-"+b.dataset.t))});
+function esc(s){const d=document.createElement("div");d.textContent=s;return d.innerHTML}
+function quick(){const q=document.getElementById("quick");if(!q)return;q.innerHTML=[0,1,4].map(k=>{const v=MIN+k*INC;return`<button type="button" data-v="${v}">${brl(v)}</button>`}).join("");
+q.querySelectorAll("button").forEach(b=>b.onclick=()=>{document.getElementById("val").value=(b.dataset.v/100).toFixed(2).replace(".",",")})}
+quick();
+async function poll(){try{const r=await fetch("/api/lote/"+LID,{cache:"no-store"});const d=await r.json();
+["cd","mcd"].forEach(i=>{const e=document.getElementById(i);if(e)e.dataset.end=d.end_ts});
+document.getElementById("endat").textContent=new Date(d.end_ts*1000).toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo"});
+const n3=document.getElementById("nb3");if(n3)n3.textContent=d.nbids;const tt=document.getElementById("tot");if(tt&&d.current_cents)tt.textContent=brl(Math.round(d.current_cents*(1+COM/100)));
+if(d.current){document.getElementById("cur").textContent=d.current;document.getElementById("lbl").textContent="Lance atual";const m=document.getElementById("mcur");if(m)m.textContent=d.current}
+document.getElementById("nb").textContent=d.nbids;document.getElementById("nb2").textContent=d.nbids;document.getElementById("lead").textContent=d.leader||"—";
+if(d.min_next_cents!==MIN){MIN=d.min_next_cents;quick();const mn=document.getElementById("mn");if(mn){mn.textContent=d.min_next;const v=document.getElementById("val");if(document.activeElement!==v)v.value=(MIN/100).toFixed(2).replace(".",",")}}
+document.getElementById("youlead").style.display=d.you_lead&&d.status=="open"?"flex":"none";
+document.getElementById("hist").innerHTML=d.bids.length?d.bids.map((b,i)=>`<tr class="${i?"":"top"}"><td>${esc(b.user)}</td><td>${esc(b.amount)}</td><td class="muted">${esc(b.at)}${b.ext?" · ⏱ +2 min":""}</td></tr>`).join(""):'<tr><td colspan="3" class="muted">Nenhum lance ainda. Seja o primeiro!</td></tr>';
+if(d.status!=="open"&&STATUS==="open"){location.reload()}STATUS=d.status;}catch(e){}}
+setInterval(poll,3000);
+setInterval(()=>{if(STATUS==="open"&&(Date.now()+OFF)/1000>=+document.getElementById("cd").dataset.end+1)poll()},1000);
+const bf=document.getElementById("bf");if(bf)bf.addEventListener("submit",async e=>{e.preventDefault();const m=document.getElementById("bmsg");const v=document.getElementById("val").value;
+if(!confirm("Confirmar lance de R$ "+v+"?"))return;
+const r=await fetch(bf.action,{method:"POST",body:new FormData(bf),headers:{"X-Requested-With":"fetch"}});const d=await r.json().catch(()=>({msg:"Erro"}));
+m.className="flash "+(d.ok?"ok":"err");m.textContent=d.msg;poll()});
+async function toggleFav(){if(!LOGGED){location.href="/entrar?next=/lote/"+LID;return}const fd=new FormData();fd.append("csrf",CSRF);
+const r=await fetch("/lote/"+LID+"/favoritar",{method:"POST",body:fd,headers:{"X-Requested-With":"fetch"}});const d=await r.json();
+const b=document.getElementById("favb");b.classList.toggle("on",d.fav);const n=document.getElementById("nfav");n.textContent=+n.textContent+(d.fav?1:-1)}
+</script>{% endblock %}

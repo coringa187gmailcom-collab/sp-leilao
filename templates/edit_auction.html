@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% block title %}Editar leilão · SP Leilões{% endblock %}{% block body %}
+<div class="card pad" style="max-width:640px;margin:0 auto"><div class="crumb"><a href="/admin">Admin</a> › <a href="/leilao/{{a.id}}">{{a.title}}</a> › Editar</div>
+<h1 style="margin-top:0;font-size:1.5rem;letter-spacing:-.02em">Editar leilão</h1>
+<form method="post"><input type="hidden" name="csrf" value="{{csrf()}}">
+<label>Nome do leilão</label><input name="titulo" required maxlength="120" value="{{a.title}}">
+<label>Descrição</label><textarea name="descricao" rows="3">{{a.description}}</textarea>
+<label>Selo no card (opcional, até 20 caracteres)</label><input name="selo" maxlength="20" value="{{a.ribbon or ''}}" placeholder="Ex.: DESOCUPADO, NOVO, ÚLTIMOS DIAS">
+<label>Local de retirada</label><input name="local" value="{{a.location}}">
+<div class="row2"><div><label>Modalidade</label><select name="modalidade">{% for m in MODALIDADES %}<option {{'selected' if m==(a.modality if a else f.get('modalidade'))}}>{{m}}</option>{% endfor %}</select></div>
+<div><label>Abertura para lances (vazio = agora{{' / manter' if a}})</label><input type="datetime-local" name="abertura"></div></div>
+<label>Edital do leilão</label><textarea name="edital" rows="7">{{(a.edital if a else f.get('edital')) or DEF_EDITAL}}</textarea>
+<label>Início do encerramento atual: {{a.end_ts|dt}}</label>
+<select name="duracao"><option value="">Manter / escolher data abaixo</option><option value="5">Daqui a 5 minutos</option><option value="60">Daqui a 1 hora</option><option value="1440">Daqui a 1 dia</option><option value="10080">Daqui a 7 dias</option></select>
+<label class="muted">Nova data e hora (horário de Brasília)</label><input type="datetime-local" name="termino">
+<p class="muted">Ao mudar a data, os lotes abertos e sem lances são reprogramados (de 2 em 2 min). Lotes com lances mantêm o horário.</p>
+<p style="margin-top:20px;display:flex;gap:10px"><button class="btn lg">Salvar</button><a class="btn ghost lg" href="/leilao/{{a.id}}">Cancelar</a></p></form></div>{% endblock %}

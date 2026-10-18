@@ -1,0 +1,8 @@
+flask==3.0.3
+gunicorn==22.0.0
+tzdata
+pyotp==2.9.0
+segno==1.6.1
+Pillow==10.4.0
+pillow-heif==0.22.0
+weasyprint==66.0

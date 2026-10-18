@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% block title %}Criar leilão · SP Leilões{% endblock %}{% block body %}
+<div class="card pad" style="max-width:640px;margin:0 auto"><h1 style="margin-top:0;font-size:1.5rem;letter-spacing:-.02em">Criar leilão</h1>
+<p class="muted">Um leilão é um evento com data que reúne vários lotes. Os lotes encerram em sequência, de 2 em 2 minutos, a partir da data escolhida.</p>
+<form method="post"><input type="hidden" name="csrf" value="{{csrf()}}">
+<label>Nome do leilão</label><input name="titulo" required maxlength="120" value="{{f.get('titulo','')}}" placeholder="Ex.: Desapego da mudança — eletrônicos e móveis">
+<label>Descrição</label><textarea name="descricao" rows="3">{{f.get('descricao','')}}</textarea>
+<label>Selo no card (opcional, até 20 caracteres)</label><input name="selo" maxlength="20" value="{{f.get('selo','')}}" placeholder="Ex.: DESOCUPADO, NOVO, ÚLTIMOS DIAS">
+<label>Local de retirada</label><input name="local" value="{{f.get('local','')}}" placeholder="Ex.: Zona Leste, São Paulo/SP">
+<div class="row2"><div><label>Modalidade</label><select name="modalidade">{% for m in MODALIDADES %}<option {{'selected' if m==f.get('modalidade')}}>{{m}}</option>{% endfor %}</select></div>
+<div><label>Abertura para lances (vazio = agora)</label><input type="datetime-local" name="abertura"></div></div>
+<label>Edital do leilão</label><textarea name="edital" rows="7">{{f.get('edital') or DEF_EDITAL}}</textarea>
+<label>Início do encerramento</label><select name="duracao" onchange="document.getElementById('dt').style.display=this.value?'none':'block'">
+<option value="">Escolher data e hora</option><option value="5">Daqui a 5 minutos</option><option value="60">Daqui a 1 hora</option><option value="1440">Daqui a 1 dia</option><option value="4320">Daqui a 3 dias</option><option value="10080">Daqui a 7 dias</option></select>
+<div id="dt"><label class="muted">Data e hora (horário de Brasília)</label><input type="datetime-local" name="termino" value="{{f.get('termino','')}}"></div>
+<p style="margin-top:20px"><button class="btn lg w">Criar leilão e adicionar lotes</button></p></form></div>{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block title %}Clientes · Admin{% endblock %}{% block body %}
+<div class="toolbar"><h1>Clientes</h1><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn ghost sm" href="/admin">← Administração</a><a class="btn sm" href="/admin/clientes.csv?{{ request.query_string.decode() }}">⬇ Exportar CSV</a></div></div>
+<div class="card pad" style="margin-bottom:14px">
+<form method="get" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end"><div style="flex:1;min-width:200px"><label style="margin-top:0">Buscar</label><input name="q" value="{{q}}" placeholder="Nome, e-mail, CPF, WhatsApp ou cidade"></div>
+<div><label style="margin-top:0">Situação</label><select name="f">{% for k,v in [('todos','Todos'),('pendentes','E-mail pendente'),('sem_ficha','Sem ficha'),('completos','Completos')] %}<option value="{{k}}" {{'selected' if filt==k}}>{{v}}</option>{% endfor %}</select></div>
+<button class="btn">Buscar</button></form>
+<p class="muted" style="margin:10px 0 0">{{stats.total or 0}} cliente(s) · {{stats.pend or 0}} com e-mail pendente · {{stats.semficha or 0}} sem ficha</p></div>
+<div class="card pad" style="overflow-x:auto">{% if not rows %}<p class="muted">Nenhum cliente encontrado.</p>{% else %}
+<table><tr><th>#</th><th>Cliente</th><th>E-mail</th><th>CPF</th><th>WhatsApp</th><th>Cidade</th><th>Hab.</th><th>Lances</th><th>Arremates</th><th>Desde</th></tr>
+{% for u in rows %}<tr><td>{{u.id}}</td><td><a href="/admin/cliente/{{u.id}}"><b>{{u.name}}</b></a>{% if not ficha_ok(u) %}<br><span class="tag" style="background:#fef3c7;color:#92400e">ficha incompleta</span>{% endif %}</td>
+<td>{{u.email}}<br>{% if u.email_verified %}<span class="tag" style="background:#dcfce7;color:#166534">confirmado</span>{% else %}<span class="tag" style="background:#fee2e2;color:#991b1b">pendente</span>{% endif %}</td>
+<td style="white-space:nowrap">{{u.cpf|cpf or '—'}}</td><td style="white-space:nowrap">{% if u.phone|wa %}<a class="btn sm wa" href="{{u.phone|wa}}" target="_blank" rel="noopener">WhatsApp</a><br><small>{{u.phone|phone}}</small>{% else %}{{u.phone or '—'}}{% endif %}</td>
+<td>{{u.city or '—'}}{% if u.uf %}/{{u.uf}}{% endif %}</td><td>{{u.nhab}}</td><td>{{u.nbids}}</td><td>{{u.nwins}}</td><td class="muted">{{u.created_at|dm}}</td></tr>{% endfor %}</table>{% endif %}</div>
+<div class="card pad" style="margin-top:14px"><h2 style="margin-top:0;font-size:1.1rem">Envio de e-mails</h2>
+{% if mode %}<p>✅ Configurado via <b>{{ {'smtp':'SMTP','brevo':'Brevo','resend':'Resend'}[mode] }}</b>.</p>{% else %}<p>⚠️ <b>Envio automático não configurado.</b> Novos clientes ficam com “confirmação pendente” — abra a ficha do cliente e clique em <b>Confirmar e-mail manualmente</b>. Para ativar o envio, configure a variável BREVO_API_KEY no Railway (recomendado; o Railway bloqueia SMTP).</p>{% endif %}
+{% if mails %}<div style="overflow-x:auto"><table><tr><th>Quando</th><th>Para</th><th>Tipo</th><th>Resultado</th></tr>{% for m in mails %}<tr><td class="muted">{{m.ts|dt}}</td><td>{{m.to_email}}</td><td>{{m.kind}}</td><td>{{'✅ enviado' if m.ok else '❌ ' ~ m.info}}</td></tr>{% endfor %}</table></div>{% endif %}</div>
+{% endblock %}

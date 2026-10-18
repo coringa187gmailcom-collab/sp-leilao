@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}Habilitação · {{a.title}}{% endblock %}{% block body %}
+<div class="card pad" style="max-width:720px;margin:0 auto"><div class="crumb"><a href="/leiloes">Leilões</a> › <a href="/leilao/{{a.id}}">Leilão nº {{auc_code(a)}}</a> › Habilitação</div>
+<h1 style="margin-top:0;font-size:1.5rem">Habilitação para o leilão</h1><p><b>{{a.title}}</b> · encerra a partir de {{a.end_ts|dm}}</p>
+{% if hab %}<div class="lead">{{icon('check',18)}} Você já está habilitado neste leilão.</div><p><a class="btn" href="{{nxt or '/leilao/' ~ a.id}}">Ir para os lotes</a></p>
+{% else %}<p class="muted">Leia o edital abaixo. A habilitação é gratuita e aprovada na hora.</p>
+<div style="white-space:pre-wrap;max-height:300px;overflow:auto;background:var(--bg);border-radius:12px;padding:14px;font-size:.9rem">{{a.edital or DEF_EDITAL}}</div>
+<form method="post"><input type="hidden" name="csrf" value="{{csrf()}}"><input type="hidden" name="next" value="{{nxt}}">
+<label style="font-weight:400;display:flex;gap:8px;align-items:flex-start"><input type="checkbox" name="aceite" value="1" style="width:auto;margin-top:4px"> <span>Li e aceito o edital e as condições de venda deste leilão. Declaro ter mais de 18 anos e estar ciente de que os lances são irrevogáveis.</span></label>
+<p><button class="btn hab lg w">{{icon('shield',18)}} Confirmar habilitação</button></p></form>{% endif %}</div>{% endblock %}

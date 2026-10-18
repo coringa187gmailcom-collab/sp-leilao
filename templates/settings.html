@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block title %}Dados da empresa · Admin{% endblock %}{% block body %}
+<div class="card pad" style="max-width:720px;margin:0 auto"><div class="crumb"><a href="/admin">Admin</a> › Dados da empresa</div>
+<h1 style="margin-top:0;font-size:1.5rem;letter-spacing:-.02em">Dados da empresa</h1>
+<p class="muted">Aparecem no topo, rodapé, Contato, página do leilão e edital. <b>Campos vazios ficam ocultos no site.</b> Preencha só com dados reais.</p>
+<form method="post"><input type="hidden" name="csrf" value="{{csrf()}}">
+{% for k, label in fields %}{% if k.startswith('_') %}<h2 style="margin:26px 0 0;font-size:1.15rem;border-top:1px solid var(--line);padding-top:18px">{{label}}</h2><p class="muted" style="margin:4px 0 0">Usados para preencher automaticamente cada nova nota (editáveis em cada nota).</p>{% else %}<label>{{label}}</label><input name="{{k}}" value="{{vals.get(k) or ''}}" maxlength="300" {% if k=='empresa' %}placeholder="SP Leilões"{% endif %}>{% endif %}{% endfor %}
+<p style="margin-top:20px"><button class="btn lg">Salvar</button></p></form></div>{% endblock %}

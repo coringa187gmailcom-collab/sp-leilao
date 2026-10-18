@@ -1,0 +1,52 @@
+{% extends "base.html" %}{% from "_m.html" import lot_card2, auction_card2 with context %}{% from "_brand.html" import logo_mark %}
+{% block hero %}
+<section class="hero2" style="background-image:linear-gradient(180deg,rgba(18,12,14,.80),rgba(18,12,14,.88)),url('{{site_img('hero')}}')"><div class="wrap">
+<div class="hlogo">{{logo_mark(92)}}<div class="hwm"><b><i>SP</i> LEILÕES</b><span>Leilões Online</span></div></div>
+<p class="htag">Veículos, imóveis e materiais com lances 100% online.</p>
+<div class="hbtns">{% if me %}<a href="/minha-conta">{{icon('user',22)}}<span>Minha conta</span></a><a href="/minha-conta?aba=habilitacoes">{{icon('check',22)}}<span>Habilitações</span></a><a href="/sair">{{icon('x',22)}}<span>Sair</span></a>
+{% else %}<a href="/entrar">{{icon('lock',22)}}<span>LOGIN</span></a><a href="/nova-senha">{{icon('key',22)}}<span>Nova senha</span></a><a href="/cadastro">{{icon('userplus',22)}}<span>Cadastre-se</span></a>{% endif %}</div>
+<div class="hcats"><h2>Pesquisar oportunidades por categoria</h2><div>{% for slug,label,ic,cs in GRUPOS %}<a class="g-{{slug}}" href="/lotes?grupo={{slug}}">{{icon(ic,22)}}<span>{{label}}</span></a>{% endfor %}</div></div>
+</div></section>
+{% endblock %}
+{% block body %}
+{% for row in brows if row %}{% set ri = loop.index %}<section class="bcar brow" data-car data-auto="5000" data-delay="{{(ri-1)*700}}" aria-label="Destaques — fileira {{ri}}"><div class="ctrack">
+{% for b in row %}{% if b.kind=='img' %}{% if b.link %}<a class="bslide" href="{{b.link}}"{% if b.link.startswith('http') %} target="_blank" rel="noopener"{% endif %}>{% else %}<div class="bslide">{% endif %}<img src="/uploads/{{b.img}}" alt="{{b.title or 'Banner ' ~ cfg.empresa}}" {% if not (ri==1 and loop.first) %}loading="lazy"{% endif %}>{% if b.link %}</a>{% else %}</div>{% endif %}
+{% else %}<div class="bslide bauto r{{ri}}"><div class="bph">{% if b.img %}<img src="/uploads/{{b.img}}" alt="" {% if not (ri==1 and loop.first) %}loading="lazy"{% endif %}>{% else %}<span class="noph">{{icon('gavel',40)}}</span>{% endif %}</div>
+<a class="bstretch" href="{{b.link}}" aria-label="{{b.title}}"></a><span class="bmod">{{b.mod}}</span>
+<div class="btx"><span class="bkick">{{b.kicker}}</span><h3>{{b.title}}</h3><p>{{b.sub}}</p>
+<div class="bchips">{% if b.soon %}<span class="bsoon">EM BREVE</span>{% endif %}{% for ch in b.chips %}<span>{{ch}}</span>{% endfor %}</div>
+<a class="bgo" href="{{b.all_link}}">Veja todos os lotes {{icon('right',14)}}</a></div></div>{% endif %}{% endfor %}
+</div><button class="cprev" type="button" aria-label="Anterior">{{icon('left',22)}}</button><button class="cnext" type="button" aria-label="Próximo">{{icon('right',22)}}</button><div class="cdots"></div></section>{% endfor %}
+
+<section class="attn" aria-label="Atenção"><div class="attn-ic">{{icon('alert',40)}}</div><div>
+<h3>*** ATENÇÃO ***</h3>
+<p>Antes de ofertar lances, confira se o seu cadastro está <b>completo e atualizado</b>: <b>endereço, telefone/WhatsApp, e-mail e CPF</b>. Esses dados são usados na emissão dos documentos da arrematação e na transferência do bem.</p>
+<p>Dados divergentes dos registros da Receita Federal podem atrasar ou impedir a entrega, sob responsabilidade do arrematante. Atualize em <a href="/minha-conta/ficha">Minha conta › Ficha do cliente</a>{% if cfg.email or cfg.whatsapp %} ou fale com nosso atendimento: {% if cfg.email %}<a href="mailto:{{cfg.email}}">{{cfg.email}}</a>{% endif %}{% if cfg.email and cfg.whatsapp %} · {% endif %}{% if cfg.whatsapp %}<a href="{{cfg.wa_link}}" target="_blank" rel="noopener">WhatsApp {{cfg.whatsapp}}</a>{% endif %}{% endif %}.</p></div></section>
+
+<section class="tiles" aria-label="Categorias">{% for c in CATEGORIAS %}<a class="tile" href="/lotes?cat={{c|urlencode}}"><img src="{{site_img(CAT_SLUG[c])}}" alt="{{c}}" loading="lazy"><span>{{c|upper|replace('/',' / ')}}{% if cats.get(c) %}<small>{{cats.get(c)}} lote{{'' if cats.get(c)==1 else 's'}}</small>{% endif %}</span></a>{% endfor %}</section>
+
+<section class="sec2"><h2 class="h2s">Próximos leilões</h2>
+{% if prox_lotes %}<div class="plhd"><h3>{{icon('gavel',18)}} Lotes que vão a leilão</h3><a href="/lotes">Ver todos</a></div>
+<div class="lcar" data-car data-auto="5000" aria-label="Lotes que vão a leilão"><div class="ctrack">{% for l in prox_lotes %}{{lot_card2(l)}}{% endfor %}</div><button class="cprev" type="button" aria-label="Lotes anteriores">{{icon('left',20)}}</button><button class="cnext" type="button" aria-label="Próximos lotes">{{icon('right',20)}}</button><div class="cdots"></div></div>{% endif %}
+{% if upcoming %}<div class="agrid3">{% for a in upcoming %}{{auction_card2(a)}}{% endfor %}</div>
+{% else %}<div class="card empty">Nenhum leilão agendado no momento. Novos leilões são publicados aqui e na <a href="/agenda">agenda</a>.{% if not me %} <a href="/cadastro">Cadastre-se</a> para participar.{% endif %}</div>{% endif %}</section>
+
+{% for a, lots in sections %}<section class="asec"><div class="awd">{{icon('calendar',18)}} {{a.end_ts|wd}}</div>
+<h3 class="aht">{{a.end_ts|dmy}}{% if a.location %} - {{a.location|upper}}{% endif %}</h3><p class="ahs"><b>{{a.nlots}} LOTE{{'' if a.nlots==1 else 'S'}}</b> · {{a.title}} · Leilão nº {{auc_code(a)}} · {{MOD_LABEL.get(a.modality or 'Online','ONLINE')}}</p>
+<a class="btn-go" href="/leilao/{{a.id}}">{{icon('search',20)}} Ver Lotes</a>
+<div class="lcar" data-car data-auto="5000" aria-label="Lotes do leilão {{auc_code(a)}}"><div class="ctrack">{% for l in lots %}{{lot_card2(l)}}{% endfor %}</div><button class="cprev" type="button" aria-label="Lotes anteriores">{{icon('left',20)}}</button><button class="cnext" type="button" aria-label="Próximos lotes">{{icon('right',20)}}</button><div class="cdots"></div></div></section>{% endfor %}
+
+<section class="sec2"><h2 class="h2s">Leilões em destaque</h2><div class="acc">
+{% for slug,label,ic,lots in destaques %}<details class="acc-{{slug}}" {% if loop.first and lots %}open{% endif %}><summary>{{icon(ic,20)}} {{label|upper}}<span class="acc-n">{{lots|length}}{{'+' if lots|length>=12}} lote{{'' if lots|length==1 else 's'}}</span></summary>
+<div class="acc-b">{% if lots %}<div class="lcar" data-car data-auto="5000"><div class="ctrack">{% for l in lots %}{{lot_card2(l)}}{% endfor %}</div><button class="cprev" type="button" aria-label="Anterior">{{icon('left',20)}}</button><button class="cnext" type="button" aria-label="Próximo">{{icon('right',20)}}</button><div class="cdots"></div></div>
+<p style="text-align:center;margin:12px 0 0"><a class="btn ghost sm" href="/lotes?grupo={{slug}}">Ver todos os lotes de {{label}}</a></p>
+{% else %}<p class="muted" style="margin:0">Nenhum lote aberto em {{label}} no momento. <a href="/agenda">Veja a agenda</a> dos próximos leilões.</p>{% endif %}</div></details>{% endfor %}
+</div></section>
+
+<section class="sec2 card pad"><h2 class="h2s" style="margin-top:0">Como participar</h2><div class="steps">
+<div class="step"><div class="n">1</div><h3>Cadastre-se</h3><p>Crie sua conta e confirme seu e-mail.</p></div>
+<div class="step"><div class="n">2</div><h3>Complete a ficha</h3><p>CPF, WhatsApp e endereço atualizados.</p></div>
+<div class="step"><div class="n">3</div><h3>Habilite-se</h3><p>Leia o edital e habilite-se no leilão.</p></div>
+<div class="step"><div class="n">4</div><h3>Dê seus lances</h3><p>Lance no fim prorroga o lote em 2 minutos.</p></div></div>
+<p style="margin:14px 0 0"><a href="/como-funciona">Regras completas →</a></p></section>
+{% endblock %}

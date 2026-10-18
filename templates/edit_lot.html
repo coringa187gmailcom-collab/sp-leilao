@@ -1,0 +1,31 @@
+{% extends "base.html" %}{% block title %}Editar lote · SP Leilões{% endblock %}{% block body %}
+<div class="card pad" style="max-width:720px;margin:0 auto"><div class="crumb"><a href="/admin">Admin</a> › <a href="/lote/{{l.id}}">Lote {{lotno(l)}}</a> › Editar</div>
+<h1 style="margin-top:0;font-size:1.5rem;letter-spacing:-.02em">Editar lote</h1>
+{% if locked %}<div class="flash warn">Este lote já {{'tem '~nb~' lance(s)' if nb else 'foi encerrado'}}: lance inicial, incremento e término ficam travados. Textos, categoria e fotos podem ser editados.</div>{% endif %}
+<form method="post" enctype="multipart/form-data" data-fotos><input type="hidden" name="csrf" value="{{csrf()}}">
+<label>Título</label><input name="titulo" required maxlength="120" value="{{l.title}}">
+<label>Descrição</label><textarea name="descricao" rows="4">{{l.description}}</textarea>
+<div class="row2"><div><label>Destaques do lote (etiquetas, separadas por vírgula)</label><input name="tags" maxlength="200" value="{{l.tags or ''}}" placeholder="Ex.: Ar cond., Dir. hidráulica, Único dono"></div>
+<div><label>Observação curta (aparece no card)</label><input name="observacao" maxlength="60" value="{{l.note or ''}}" placeholder="Ex.: Frota · Remarcado"></div></div>
+<label>Categoria</label><select name="categoria">{% for c in CATEGORIAS %}<option {{'selected' if c==l.category}}>{{c}}</option>{% endfor %}</select>
+<div class="row2"><div><label>Lance inicial (R$)</label><input name="lance_inicial" inputmode="decimal" value="{{'%.2f'|format(l.start_cents/100)|replace('.',',')}}" {{'disabled' if locked}}></div>
+<div><label>Incremento mínimo (R$)</label><input name="incremento" inputmode="decimal" value="{{'%.2f'|format(l.inc_cents/100)|replace('.',',')}}" {{'disabled' if locked}}></div></div>
+<label>Ficha técnica (uma por linha, no formato <i>Campo: valor</i>)</label><textarea name="ficha" rows="5" placeholder="Ano/Modelo: 2016/2016&#10;Quilometragem: 48.000 km&#10;Combustível: gasolina">{{l.specs or ''}}</textarea>
+<div class="row2"><div><label>Avaliação (R$, opcional)</label><input name="avaliacao" inputmode="decimal" value="{{('%.2f'|format(l.appraisal_cents/100))|replace('.',',') if l.appraisal_cents else ''}}"></div><div><label>Comissão do leiloeiro (%)</label><input name="comissao" inputmode="decimal" value="{{'%g'|format(l.commission_pct or 0)}}"></div></div>
+<label>Taxas</label><input name="taxas" value="{{l.fees or ''}}">
+<label>Término atual: {{l.end_ts|dt}}</label>
+{% if not locked %}<select name="duracao"><option value="">Manter / escolher data abaixo</option><option value="5">Daqui a 5 minutos</option><option value="60">Daqui a 1 hora</option><option value="1440">Daqui a 1 dia</option><option value="10080">Daqui a 7 dias</option></select>
+<label class="muted">Nova data e hora (horário de Brasília)</label><input type="datetime-local" name="termino">{% endif %}
+<label>Fotos atuais</label>{% if photos %}<div class="fotos-atuais">{% for p in photos %}<div class="foto-atual"><img src="/uploads/{{p.filename}}" alt="">
+<label class="opt"><input type="radio" name="capa" value="e{{p.id}}" {{'checked' if loop.first}}> ★ Capa</label>
+<label class="opt"><input type="checkbox" name="remover_foto" value="{{p.id}}"> Remover</label></div>{% endfor %}</div>{% else %}<p class="muted">Sem fotos.</p>{% endif %}
+<input type="radio" name="capa" value="n0" hidden {{'checked' if not photos}}>
+<div class="fotos" data-max="{{MAX_PHOTOS}}"><div class="fotos-head"><label style="margin:0">Adicionar fotos</label><span class="fotos-count muted"></span></div>
+<input type="file" name="fotos" id="fotos-in" accept="image/*,.heic,.heif" multiple>
+<div class="fotos-prev"></div>
+<label for="fotos-in" class="btn ghost fotos-add">📷 Adicionar fotos</label>
+<p class="muted fotos-hint">Até {{MAX_PHOTOS}} fotos — JPG, PNG, WEBP ou HEIC (iPhone), até 20 MB cada. Fotos grandes são reduzidas automaticamente. Toque em ★ para escolher a capa.</p>
+<progress class="fotos-bar" hidden max="1" value="0"></progress><p class="fotos-msg"></p></div>
+<label>Condições de venda</label><textarea name="condicoes" rows="4">{{l.conditions}}</textarea>
+<label>Retirada</label><textarea name="retirada" rows="3">{{l.pickup}}</textarea>
+<p style="margin-top:20px;display:flex;gap:10px"><button class="btn lg">Salvar alterações</button><a class="btn ghost lg" href="/lote/{{l.id}}">Cancelar</a></p></form></div><script src="/static/fotos.js?v={{VERSION}}"></script>{% endblock %}

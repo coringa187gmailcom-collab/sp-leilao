@@ -1,0 +1,74 @@
+{% from "_brand.html" import logo_mark, wordmark %}<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}{{cfg.empresa}} — leilões online de veículos, imóveis e materiais{% endblock %}</title><meta name="theme-color" content="#17181c">
+<meta name="description" content="{{cfg.empresa}}: leilões online de veículos, motos, caminhões, imóveis e materiais. Cadastre-se, habilite-se e dê seus lances.">
+<link rel="icon" href="/static/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/app.css?v={{VERSION}}">{% block head %}{% endblock %}</head><body class="{% block bodycls %}{% endblock %}">
+<header class="hd2"><div class="wrap hrow">
+<a class="brand" href="/" aria-label="{{cfg.empresa}} — início">{{logo_mark(40)}}{{wordmark()}}</a>
+<nav class="dnav"><a href="/leiloes">Leilões</a><a href="/agenda">Agenda</a><a href="/lotes">Lotes</a><a href="/como-funciona">Como participar</a>
+{% if me %}{% if me.is_admin %}<a href="/admin">Admin</a>{% endif %}<a href="/minha-conta">{{icon('user',16)}} {{me.name|short}}</a>{% else %}<a href="/entrar">{{icon('user',16)}} Entrar</a><a class="cta" href="/cadastro">Cadastre-se</a>{% endif %}</nav>
+<button class="burger" type="button" aria-label="Abrir menu" aria-controls="mm" onclick="menu(true)">{{icon('menu',26)}}</button>
+</div></header>
+<div class="drawer" id="mm" hidden onclick="if(event.target===this)menu(false)"><div class="dpanel" role="dialog" aria-label="Menu">
+<div class="dtop"><a class="brand" href="/">{{logo_mark(34)}}{{wordmark()}}</a><button type="button" class="dclose" aria-label="Fechar menu" onclick="menu(false)">{{icon('x',24)}}</button></div>
+<form class="dsearch" action="/lotes">{{icon('search',18)}}<input name="q" placeholder="Buscar lotes (ex.: Gol, apartamento...)" value="{{request.args.get('q','')}}"></form>
+{% if me %}<div class="dhello">Olá, <b>{{me.name|short}}</b></div>{% endif %}
+<nav class="dlinks"><a href="/">Início</a><a href="/leiloes">{{icon('gavel',18)}} Leilões</a><a href="/agenda">{{icon('calendar',18)}} Agenda de leilões</a><a href="/lotes">{{icon('box',18)}} Todos os lotes</a>
+<span class="dh">Categorias</span>{% for c in CATEGORIAS %}<a href="/lotes?cat={{c|urlencode}}">{{icon(CAT_ICON[c],18)}} {{c}}</a>{% endfor %}
+<span class="dh">Atendimento</span><a href="/como-funciona">Como participar</a><a href="/condicoes">Condições de venda</a><a href="/contato">Contato</a>
+<span class="dh">Sua conta</span>{% if me %}<a href="/minha-conta">{{icon('user',18)}} Minha conta</a><a href="/minha-conta/ficha">Ficha do cliente</a><a href="/minha-conta?aba=habilitacoes">Habilitações</a>{% if me.is_admin %}<a href="/admin">Painel admin</a><a href="/admin/pagina-inicial">Banners e fotos</a>{% endif %}<a href="/sair">Sair</a>
+{% else %}<a href="/entrar">{{icon('lock',18)}} Entrar</a><a href="/nova-senha">{{icon('key',18)}} Nova senha</a><a href="/cadastro">{{icon('userplus',18)}} Cadastre-se</a>{% endif %}</nav></div></div>
+{% block hero %}{% endblock %}
+<main class="wrap">
+{% if back %}<div class="backbar"><a class="backbtn" href="{{back[0]}}" data-fallback="{{back[0]}}" onclick="return goBack(event)" aria-label="Voltar para a página anterior">{{icon('left',20)}}<span>Voltar</span></a>
+{% if back_crumb %}<nav class="bcrumb" aria-label="Você está em"><a href="/">Início</a> › <a href="{{back[0]}}">{{back[1]}}</a></nav>{% endif %}</div>{% endif %}
+{% with ms = get_flashed_messages(with_categories=true) %}{% for c,m in ms %}<div class="flash {{c}}">{{m}}</div>{% endfor %}{% endwith %}
+{% block body %}{% endblock %}</main>
+<footer class="ft"><div class="wrap"><div class="cols">
+<div class="fbrand"><a class="brand" href="/">{{logo_mark(44)}}{{wordmark()}}</a><p>Leilões online de veículos, motos, caminhões, sinistros, imóveis e materiais. Lances em tempo real, com habilitação por leilão e prorrogação automática no fim de cada lote.</p>
+{% if cfg.leiloeiro_nome %}<p class="fsmall">Leiloeiro oficial: <b>{{cfg.leiloeiro_nome}}</b>{% if cfg.leiloeiro_matricula %} · JUCESP nº {{cfg.leiloeiro_matricula}}{% endif %}</p>{% endif %}</div>
+<div><h5>Leilões</h5><a href="/leiloes">Todos os leilões</a><a href="/agenda">Agenda</a><a href="/lotes?status=encerrando">Encerrando</a><a href="/lotes?status=encerrados">Encerrados</a></div>
+<div><h5>Categorias</h5>{% for c in CATEGORIAS %}<a href="/lotes?cat={{c|urlencode}}">{{c}}</a>{% endfor %}</div>
+<div><h5>Institucional</h5><a href="/como-funciona">Como participar</a><a href="/condicoes">Condições de venda</a><a href="/condicoes#privacidade">Privacidade</a><a href="/contato">Contato</a>{% if me %}<a href="/minha-conta">Minha conta</a>{% else %}<a href="/entrar">Entrar</a><a href="/cadastro">Cadastre-se</a>{% endif %}</div>
+<div><h5>Atendimento</h5>{% if cfg.whatsapp %}<a href="{{cfg.wa_link}}" target="_blank" rel="noopener">WhatsApp {{cfg.whatsapp}}</a>{% endif %}{% if cfg.telefone %}<a href="tel:{{cfg.telefone|replace(' ','')}}">Tel. {{cfg.telefone}}</a>{% endif %}{% if cfg.email %}<a href="mailto:{{cfg.email}}">{{cfg.email}}</a>{% endif %}{% if cfg.instagram %}<a href="https://instagram.com/{{cfg.instagram|replace('@','')}}" target="_blank" rel="noopener">Instagram {{cfg.instagram}}</a>{% endif %}{% if cfg.horario %}<span class="fsmall">{{cfg.horario}}</span>{% endif %}{% if cfg.endereco %}<span class="fsmall">{{cfg.endereco}}</span>{% endif %}{% if not (cfg.whatsapp or cfg.telefone or cfg.email) %}<a href="/contato">Fale conosco</a>{% endif %}</div>
+</div><div class="bt"><span>© {{server_now|year}} {{cfg.empresa}}{% if cfg.cnpj %} · CNPJ {{cfg.cnpj}}{% endif %} · Todos os direitos reservados</span><span>Horários de Brasília · <a href="/condicoes">Condições</a> · <a href="/condicoes#privacidade">Privacidade</a></span></div></div></footer>
+{% if cfg.whatsapp %}<a class="wa-fab" href="{{cfg.wa_link}}?text={{('Olá! Vim pelo site da ' ~ cfg.empresa ~ ' e gostaria de atendimento.')|urlencode}}" target="_blank" rel="noopener" aria-label="Fale conosco pelo WhatsApp"><svg width="30" height="30" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35M12.05 21.5h-.01a9.4 9.4 0 0 1-4.8-1.32l-.34-.2-3.57.94.95-3.48-.22-.36a9.4 9.4 0 0 1-1.44-5.02c0-5.2 4.24-9.43 9.44-9.43 2.52 0 4.89.98 6.67 2.77a9.37 9.37 0 0 1 2.76 6.67c0 5.2-4.24 9.43-9.44 9.43m8.03-17.46A11.27 11.27 0 0 0 12.05.72C5.8.72.7 5.8.7 12.07c0 2 .52 3.95 1.52 5.67L.6 23.62l6.02-1.58a11.33 11.33 0 0 0 5.42 1.38h.01c6.26 0 11.35-5.09 11.35-11.35 0-3.03-1.18-5.88-3.32-8.03"/></svg></a>{% endif %}
+<script>
+const AFTER_POST={{'true' if back_after_post else 'false'}};
+function goBack(e){try{const r=document.referrer;if(!AFTER_POST&&r&&history.length>1){const u=new URL(r);
+if(u.origin===location.origin&&u.href!==location.href&&!/\/(sair|nova-senha\/)/.test(u.pathname)){e.preventDefault();history.back();return false}}}catch(_){}return true}
+function menu(o){const m=document.getElementById('mm');if(o){m.hidden=false;document.body.style.overflow='hidden'}else{m.hidden=true;document.body.style.overflow=''}}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')menu(false)});
+const OFF={{server_now}}*1000-Date.now();const p2=n=>String(n).padStart(2,"0");
+function parts(s){return[Math.floor(s/86400),Math.floor(s%86400/3600),Math.floor(s%3600/60),s%60]}
+function fmtCd(s){if(s<=0)return"Encerrado";const[d,h,m,x]=parts(s);return(d?d+"d ":"")+p2(h)+":"+p2(m)+":"+p2(x)}
+function tick(){const n=(Date.now()+OFF)/1000;document.querySelectorAll("[data-end]").forEach(e=>{const s=Math.max(0,Math.floor(e.dataset.end-n));
+if(e.classList.contains("cdbig")){const[d,h,m,x]=parts(s);e.innerHTML=`<div><b>${d}</b><span>dias</span></div><div><b>${p2(h)}</b><span>horas</span></div><div><b>${p2(m)}</b><span>min</span></div><div><b>${p2(x)}</b><span>seg</span></div>`;e.classList.toggle("urg",s<3600)}
+else{e.textContent=fmtCd(s);e.classList.toggle("urg",s>0&&s<3600);e.classList.toggle("end",s<=0)}})}
+function clk(){const e=document.getElementById('clk');if(e)e.textContent=new Date(Date.now()+OFF).toLocaleTimeString('pt-BR',{timeZone:'America/Sao_Paulo'})}
+setInterval(()=>{tick();clk()},1000);tick();clk();
+const RM=matchMedia('(prefers-reduced-motion: reduce)');
+document.querySelectorAll('[data-car]').forEach(car=>{const tr=car.querySelector('.ctrack');if(!tr||!tr.children.length)return;
+ const dots=car.querySelector('.cdots'),auto=+car.dataset.auto||0;let iv=null,t,idle,hover=false,hold=false,vis=true,user=false;
+ const step=()=>{const a=tr.children[0].getBoundingClientRect().width;return a+(parseFloat(getComputedStyle(tr).columnGap)||0)};
+ const pages=()=>Math.max(1,Math.round((tr.scrollWidth-tr.clientWidth)/step())+1);
+ const cur=()=>Math.min(pages()-1,Math.round(tr.scrollLeft/step()));
+ const go=i=>{const n=pages();i=(i+n)%n;tr.scrollTo({left:i*step(),behavior:RM.matches?'auto':'smooth'})};
+ const draw=()=>{const n=pages();car.classList.toggle('single',n<=1);if(!dots)return;if(dots.children.length!==n){dots.innerHTML='';for(let i=0;i<n;i++){const b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Ir para '+(i+1));b.onclick=()=>{go(i);rs()};dots.appendChild(b)}}[...dots.children].forEach((b,k)=>b.classList.toggle('on',k===cur()))};
+ const can=()=>auto&&!RM.matches&&!user&&!hover&&!hold&&vis&&!document.hidden&&tr.offsetParent!==null&&pages()>1;
+ const rs=()=>{clearInterval(iv);iv=auto?setInterval(()=>{if(can())go(cur()+1)},auto):null};
+ let pb=null;if(auto){pb=document.createElement('button');pb.type='button';pb.className='cplay';car.appendChild(pb);
+  const sp=()=>{const off=user||RM.matches;pb.innerHTML=off?'&#9654;':'&#10073;&#10073;';pb.setAttribute('aria-label',off?'Rolar automaticamente':'Pausar rolagem automática');pb.title=pb.getAttribute('aria-label');car.classList.toggle('paused',off)};
+  pb.onclick=()=>{if(RM.matches)return;user=!user;sp();rs()};sp();RM.addEventListener?.('change',sp)}
+ const release=()=>{clearTimeout(idle);idle=setTimeout(()=>{hold=false;rs()},5000)};
+ car.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')hover=true});car.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'){hover=false;rs()}});
+ car.addEventListener('focusin',()=>{hover=true});car.addEventListener('focusout',()=>{hover=false;rs()});
+ tr.addEventListener('pointerdown',()=>{hold=true;clearTimeout(idle)},{passive:true});tr.addEventListener('touchstart',()=>{hold=true;clearTimeout(idle)},{passive:true});
+ ['pointerup','pointercancel','touchend'].forEach(ev=>tr.addEventListener(ev,release,{passive:true}));
+ tr.addEventListener('wheel',e=>{if(Math.abs(e.deltaX)>Math.abs(e.deltaY)){hold=true;release()}},{passive:true});
+ if('IntersectionObserver' in window)new IntersectionObserver(es=>{vis=es[0].isIntersecting}).observe(car);
+ car.querySelector('.cprev')?.addEventListener('click',()=>{go(cur()-1);rs()});car.querySelector('.cnext')?.addEventListener('click',()=>{go(cur()+1);rs()});
+ tr.addEventListener('scroll',()=>{clearTimeout(t);t=setTimeout(draw,80)},{passive:true});addEventListener('resize',draw);draw();setTimeout(rs,+car.dataset.delay||0);});
+</script>{% block scripts %}{% endblock %}</body></html>

@@ -1,0 +1,50 @@
+{% extends "base.html" %}{% block title %}{{ {'como':'Como participar','condicoes':'Condições e privacidade','contato':'Contato'}[page] }} · {{cfg.empresa}}{% endblock %}{% block body %}
+<div class="card pad prose" style="margin:0 auto">
+{% if page=='como' %}<h1 style="margin-top:0">Como participar</h1>
+<p>A {{cfg.empresa}} realiza leilões online de bens usados. Todos os lotes são publicados pela própria {{cfg.empresa}}; você se cadastra, se habilita no leilão de interesse e oferta seus lances pela internet.</p>
+<div class="steps" style="margin:20px 0">
+<div class="step card"><div class="n">1</div><h3>Cadastro</h3><p>Crie sua conta, confirme seu e-mail e preencha sua ficha de cliente.</p></div>
+<div class="step card"><div class="n">2</div><h3>Habilitação</h3><p>Em cada leilão, leia o edital e clique em “Habilite-se”.</p></div>
+<div class="step card"><div class="n">3</div><h3>Lances</h3><p>Oferte lances a partir do mínimo (lance atual + incremento).</p></div>
+<div class="step card"><div class="n">4</div><h3>Arremate</h3><p>Ao encerrar, o maior lance vence e a {{cfg.empresa}} entra em contato.</p></div></div>
+<h2>Habilitação</h2><p>Para ofertar lances nos lotes de um leilão é preciso estar <b>habilitado</b> naquele leilão, o que implica a aceitação do edital. Leilões “Em breve” já aceitam habilitação, mas só recebem lances a partir da abertura.</p>
+<h2>Comissão e taxas</h2><p>Cada lote informa a comissão do leiloeiro (percentual sobre o valor arrematado) e eventuais taxas. O valor total a pagar é o lance vencedor acrescido da comissão.</p>
+<h2>Leilões e lotes</h2><p>Um <b>leilão</b> é um evento com data de abertura e de encerramento que agrupa vários <b>lotes</b>. Os lotes de um leilão encerram em sequência, de 2 em 2 minutos. Também podem existir <b>lotes avulsos</b>, com data própria.</p>
+<h2>Cronômetro e prorrogação</h2><p>Cada lote tem um cronômetro regressivo atualizado automaticamente. Se houver lance nos <b>últimos 2 minutos</b>, o encerramento daquele lote é prorrogado em <b>2 minutos</b>, garantindo a todos a chance de responder.</p>
+<h2>Depois do arremate</h2><p>A {{cfg.empresa}} entra em contato com o arrematante pelos dados do cadastro para informar a forma e o prazo de pagamento e agendar a retirada. Em “Minha conta › Meus lances” aparece o aviso “Você venceu”.</p>
+{% elif page=='condicoes' %}<h1 style="margin-top:0">Condições de uso e de venda</h1>
+<ul><li>Os bens são usados e vendidos pela {{cfg.empresa}} no estado de conservação em que se encontram, sem garantia. Leia a descrição, a ficha técnica e as condições de cada lote e, quando possível, visite o bem antes de ofertar lances.</li>
+<li>Para participar é necessário ter mais de 18 anos, manter cadastro com dados verdadeiros e estar habilitado no leilão.</li>
+<li>Os lances são irrevogáveis e irretratáveis. O lance mínimo é o lance atual acrescido do incremento do lote.</li>
+<li>Lance nos últimos 2 minutos prorroga o encerramento do lote em 2 minutos. Vence o maior lance quando o cronômetro zerar.</li>
+<li>O arrematante paga o valor do lance vencedor acrescido da comissão do leiloeiro e de eventuais taxas indicadas no lote, na forma e no prazo informados pela {{cfg.empresa}}.</li>
+<li>O não pagamento no prazo poderá acarretar o cancelamento da arrematação e o bloqueio do cadastro.</li>
+<li>A {{cfg.empresa}} pode suspender, alterar ou cancelar leilões e lotes e remover cadastros que descumpram estas condições.</li></ul>
+<h2 id="privacidade">Política de privacidade</h2>
+<p>Esta política explica como a {{cfg.empresa}}{% if cfg.cnpj %} (CNPJ {{cfg.cnpj}}){% endif %}, controladora dos dados, trata as informações pessoais dos participantes, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD).</p>
+<h3>Quais dados coletamos</h3><ul><li><b>Cadastro:</b> nome, e-mail e senha (armazenada de forma criptografada).</li>
+<li><b>Ficha do cliente:</b> nome completo, CPF, data de nascimento, WhatsApp e endereço completo.</li>
+<li><b>Participação:</b> habilitações, lances, arremates e favoritos.</li>
+<li><b>Segurança:</b> endereço IP e registros de acesso/login.</li></ul>
+<h3>Para que usamos (finalidade)</h3><ul><li>Identificar participantes e confirmar que são maiores de 18 anos;</li>
+<li>Habilitar nos leilões, registrar lances e apurar arrematantes;</li>
+<li>Entrar em contato sobre pagamento, retirada e emissão de documentos de venda;</li>
+<li>Prevenir fraudes e proteger as contas;</li><li>Cumprir obrigações legais e regulatórias.</li></ul>
+<p>Bases legais: execução do contrato de participação no leilão, cumprimento de obrigação legal, exercício regular de direitos e legítimo interesse na prevenção a fraudes.</p>
+<h3>Quem tem acesso</h3><p>Os dados pessoais são visíveis apenas para a administração da {{cfg.empresa}}. Nos históricos públicos de lances, os participantes aparecem só com nome abreviado. Não vendemos dados. Podemos usar prestadores de serviço necessários à operação (hospedagem do site e envio de e-mails) e compartilhar dados quando exigido por lei ou autoridade competente. A busca de endereço pelo CEP é feita pelo seu navegador no serviço público ViaCEP, enviando apenas o CEP.</p>
+<h3>Por quanto tempo</h3><p>Mantemos os dados enquanto a conta estiver ativa e, depois, pelo prazo necessário ao cumprimento de obrigações legais e à defesa em eventuais processos.</p>
+<h3>Seus direitos</h3><p>Você pode solicitar confirmação de tratamento, acesso, correção, anonimização, portabilidade ou exclusão dos seus dados, além de informações sobre compartilhamento e revogação de consentimento (art. 18 da LGPD). Você mesmo pode corrigir sua ficha em <a href="/minha-conta/ficha">Minha conta › Minha ficha</a>.</p>
+<h3>Contato</h3><p>Para exercer seus direitos ou tirar dúvidas sobre privacidade, fale com a {{cfg.empresa}}{% if cfg.email %} pelo e-mail <a href="mailto:{{cfg.email}}">{{cfg.email}}</a>{% endif %}{% if cfg.whatsapp %}{{' ou' if cfg.email else ''}} pelo WhatsApp <a href="{{cfg.wa_link}}" target="_blank" rel="noopener">{{cfg.whatsapp}}</a>{% endif %}{% if not cfg.email and not cfg.whatsapp %} pelos canais da página <a href="/contato">Contato</a>{% endif %}.</p>
+{% else %}<h1 style="margin-top:0">Contato</h1><p>Fale com a {{cfg.empresa}} para dúvidas sobre leilões, habilitação, pagamento ou retirada.</p>
+{% if cfg.whatsapp or cfg.telefone or cfg.email or cfg.endereco or cfg.horario or cfg.instagram or cfg.cnpj or cfg.leiloeiro_nome %}<div class="infogrid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">
+{% if cfg.whatsapp %}<div><span>WhatsApp</span><b><a href="{{cfg.wa_link}}" target="_blank" rel="noopener">{{cfg.whatsapp}}</a></b></div>{% endif %}
+{% if cfg.telefone %}<div><span>Telefone</span><b><a href="tel:{{cfg.telefone}}">{{cfg.telefone}}</a></b></div>{% endif %}
+{% if cfg.email %}<div><span>E-mail</span><b><a href="mailto:{{cfg.email}}">{{cfg.email}}</a></b></div>{% endif %}
+{% if cfg.instagram %}<div><span>Instagram</span><b><a href="https://instagram.com/{{cfg.instagram|replace('@','')}}" target="_blank" rel="noopener">{{cfg.instagram}}</a></b></div>{% endif %}
+{% if cfg.horario %}<div><span>Horário de atendimento</span><b>{{cfg.horario}}</b></div>{% endif %}
+{% if cfg.endereco %}<div><span>Endereço</span><b>{{cfg.endereco}}</b></div>{% endif %}
+{% if cfg.cnpj %}<div><span>CNPJ</span><b>{{cfg.cnpj}}</b></div>{% endif %}
+{% if cfg.leiloeiro_nome %}<div><span>Leiloeiro oficial</span><b>{{cfg.leiloeiro_nome}}{% if cfg.leiloeiro_matricula %} — JUCESP nº {{cfg.leiloeiro_matricula}}{% endif %}</b></div>{% endif %}
+</div>{% endif %}
+<p>Se você arrematou um lote, a {{cfg.empresa}} entrará em contato pelo e-mail ou telefone do seu cadastro.</p>{% endif %}
+</div>{% endblock %}

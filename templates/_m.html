@@ -1,0 +1,65 @@
+{% macro lot_card(l, favs) -%}
+{% set b = badge(l) %}
+<a class="lc" href="/lote/{{l.id}}">
+ <div class="ph">{% if l.photo %}<img src="/uploads/{{l.photo}}" alt="{{l.title}}" loading="lazy">{% endif %}
+  <span class="bd {{b[1]}}">{{b[0]}}</span>
+  {% if l.id in favs %}<span class="fav on">{{icon('heart',18)}}</span>{% endif %}
+  <span class="num">Lote {{lotno(l)}}</span>{% set sh = lot_share(l) %}<span class="lcs" role="button" tabindex="0" aria-label="Compartilhar no WhatsApp" title="Compartilhar no WhatsApp" data-u="{{sh.wa}}" onclick="event.preventDefault();event.stopPropagation();window.open(this.dataset.u,'_blank','noopener')" onkeydown="if(event.key==='Enter'){this.click()}">{{wa_svg(15,'#fff')}}</span></div>
+ <div class="bo">
+  <div class="au">{{icon(CAT_ICON.get(l.category,'box'),13)}} {{l.category}}{% if l.auction_title %} · {{l.auction_title}}{% endif %}</div>
+  <h3>{{l.title}}</h3>
+  <div class="pr"><div><div class="lbl">{% if l.status!='open' %}{{'Arrematado por' if l.final_cents else 'Sem lances'}}{% elif l.cur %}Lance atual{% else %}Lance inicial{% endif %}</div>
+   <div class="price">{{ (l.final_cents if l.status!='open' else l.price)|brl if (l.status=='open' or l.final_cents) else '—' }}</div></div>
+   <div style="text-align:right"><div class="lbl">{{l.nb}} lance{{'' if l.nb==1 else 's'}}</div><div class="lbl">{{l.views or 0}} visita{{'' if l.views==1 else 's'}}</div></div></div>
+  <div class="meta">{% if l.status=='open' and b[1]=='upcoming' %}<span>{{icon('clock',14)}} Abre em <span class="cd" data-end="{{l.auction_start}}"></span></span>{% elif l.status=='open' %}<span>{{icon('clock',14)}} <span class="cd" data-end="{{l.end_ts}}"></span></span><span>{{l.end_ts|dm}}</span>
+  {% else %}<span>Encerrado em {{l.closed_at|dm}}</span>{% endif %}</div>
+ </div></a>
+{%- endmacro %}
+{% macro auction_card(a) -%}{% set st = astatus(a) %}
+<a class="auc" href="/leilao/{{a.id}}"><div class="cv">{% if a.cover %}<img src="/uploads/{{a.cover}}" alt="" loading="lazy">{% endif %}
+<span class="bd {{st[1]}}">{{st[0]}}</span><span class="mod">{{icon('gavel',12)}} {{a.modality or 'Online'}}</span></div>
+<div class="bo"><div class="code">Leilão nº {{auc_code(a)}}</div><h3>{{a.title}}</h3>
+<dl><dt>{{icon('calendar',13)}} Abertura</dt><dd>{{a.start_ts|dm}}</dd><dt>{{icon('clock',13)}} Encerra a partir de</dt><dd>{{a.end_ts|dm}}</dd>
+{% if a.location %}<dt>{{icon('pin',13)}} Local</dt><dd>{{a.location}}</dd>{% endif %}<dt>{{icon('box',13)}} Lotes</dt><dd>{{a.nlots}} · {{a.nbids}} lance{{'' if a.nbids==1 else 's'}}</dd></dl></div>
+<div class="ft2">{% if st[1]=='upcoming' %}<span class="muted">Abre em <span class="cd" data-end="{{a.start_ts}}"></span></span>{% elif a.nopen and a.next_end %}<span class="muted">Encerra em <span class="cd" data-end="{{a.next_end}}"></span></span>{% else %}<span class="muted">Encerrado</span>{% endif %}<span class="btn sm">Ver lotes</span></div></a>
+{%- endmacro %}
+{% macro filters(f, base, show_status=True) -%}
+<aside class="side card pad" id="side">
+<form action="{{base}}" method="get"><input type="hidden" name="status" value="{{f.status}}"><input type="hidden" name="cat" value="{{f.cat}}"><input type="hidden" name="grupo" value="{{f.grupo}}"><input type="hidden" name="ordem" value="{{f.ordem}}"><input type="hidden" name="tag" value="{{f.tag}}">
+<h4 style="margin-top:0">Buscar</h4><input name="q" value="{{f.q}}" placeholder="Marca, modelo, palavra-chave">
+<h4>Nº do lote</h4><input name="lote" value="{{f.lote}}" placeholder="Ex.: 12" inputmode="numeric">
+<h4>Faixa de lance (R$)</h4><div class="row2"><input name="min" value="{{f.min}}" placeholder="mín." inputmode="decimal"><input name="max" value="{{f.max}}" placeholder="máx." inputmode="decimal"></div>
+<button class="btn sm w" style="margin-top:10px">Aplicar</button></form>
+{% if show_status %}<h4>Situação</h4>
+{% for k,v in [('abertos','Abertos'),('encerrando','Encerrando (24 h)'),('encerrados','Encerrados'),('todos','Todos')] %}<a class="opt {{'on' if f.status==k}}" href="{{base}}{{qs(f,status=k)}}"><span class="l">{{v}}</span></a>{% endfor %}{% endif %}
+{% if tags_all %}<h4>Etiquetas</h4><div class="tagf">{% for t in tags_all %}<a class="{{'on' if f.tag|lower==t|lower}}" href="{{base}}{{qs(f,tag='' if f.tag|lower==t|lower else t)}}">{{t}}</a>{% endfor %}</div>{% endif %}
+{% if f.q or f.lote or f.tag or f.min or f.max or f.cat or f.grupo %}<a class="opt" href="{{base}}"><span class="l">{{icon('x',16)}} Limpar filtros</span></a>{% endif %}
+<h4>Categorias</h4><a class="opt {{'on' if not f.cat and not f.grupo}}" href="{{base}}{{qs(f,cat='',grupo='')}}"><span class="l">{{icon('filter',16)}} Todas</span></a>
+{% for c in CATEGORIAS %}<a class="opt {{'on' if f.cat==c}}" href="{{base}}{{qs(f,cat=c,grupo='')}}"><span class="l">{{icon(CAT_ICON[c],16)}} {{c}}</span></a>{% endfor %}
+</aside>
+{%- endmacro %}
+{% macro sorter(f, base, extra=[]) -%}
+<form method="get" action="{{base}}" style="display:flex;gap:8px;align-items:center">{% for k in ['q','cat','grupo','status','min','max','lote','tag'] %}{% if f[k] %}<input type="hidden" name="{{k}}" value="{{f[k]}}">{% endif %}{% endfor %}
+<button type="button" class="btn ghost sm mfilters" onclick="document.getElementById('side').classList.toggle('open')">{{icon('filter',15)}} Filtros</button>
+<select class="inl" name="ordem" onchange="this.form.submit()">{% for k,v in extra + [('encerrando','Encerrando primeiro'),('menor','Menor lance'),('maior','Maior lance'),('lances','Mais lances'),('recentes','Mais recentes')] %}<option value="{{k}}" {{'selected' if f.ordem==k}}>{{v}}</option>{% endfor %}</select></form>
+{%- endmacro %}
+{% macro lot_card2(l) -%}{% set b = badge(l) %}
+{% set sh = lot_share(l) %}<div class="lc2"><a class="lc2s" href="{{sh.wa}}" target="_blank" rel="noopener" aria-label="Compartilhar no WhatsApp" title="Compartilhar no WhatsApp">{{wa_svg(16,'#fff')}}</a><a class="lc2a" href="/lote/{{l.id}}">
+<div class="lc2n">{{lotno(l)}}</div>
+<div class="lc2p">{% if l.photo %}<img src="/uploads/{{l.photo}}" alt="{{l.title}}" loading="lazy">{% else %}<span class="noph">{{icon(CAT_ICON.get(l.category,'box'),34)}}</span>{% endif %}</div>
+<div class="lc2d">{{(l.end_ts if l.status=='open' else (l.closed_at or l.end_ts))|dmy}}</div>
+{% if l.status=='open' %}<div class="lc2c {{b[1]}}">{{icon('clock',14)}} {% if b[1]=='upcoming' %}Abre em <span class="cd" data-end="{{l.auction_start}}"></span>{% else %}Encerra <span class="cd" data-end="{{l.end_ts}}"></span>{% endif %}</div>{% endif %}
+<div class="lc2t">{{l.title|upper}}</div>
+<div class="lc2g">{% for t in tag_list(l.tags) %}<span>{{t}}</span>{% endfor %}</div>
+<div class="lc2v"><b>{{ ((l.final_cents if l.status!='open' else l.price)|brl) if (l.status=='open' or l.final_cents) else '—' }}</b>
+<span>{% if l.status!='open' %}{{'Valor arrematado' if l.final_cents else 'Sem lances'}}{% elif l.cur %}Maior lance{% else %}Lance inicial{% endif %}</span></div>
+<div class="lc2o">{{(l.note or l.category or '')|upper}}</div></a>
+<a class="lc2b {{b[1]}}" href="/lote/{{l.id}}">{% if b[1] in ('open','soon') %}ABERTO PARA LANCES{% elif b[1]=='upcoming' %}EM BREVE{% elif b[1]=='sold' %}ARREMATADO{% else %}ENCERRADO{% endif %}</a></div>
+{%- endmacro %}
+{% macro auction_card2(a) -%}
+<a class="ac2" href="/leilao/{{a.id}}"><div class="ac2p">{% if a.cover %}<img src="/uploads/{{a.cover}}" alt="{{a.title}}" loading="lazy">{% else %}<span class="noph">{{icon('gavel',34)}}</span>{% endif %}
+{% if a.ribbon %}<span class="ribbon"><span>{{a.ribbon|upper}}</span></span>{% endif %}</div>
+<div class="ac2b"><div class="ac2d">{{a.end_ts|dmy}}</div>
+<ul><li>{{a.end_ts|wd}}</li><li>{{MOD_LABEL.get(a.modality or 'Online', (a.modality or 'Online')|upper)}}</li>{% if a.location %}<li>{{a.location|upper}}</li>{% endif %}{% if a.nlots %}<li><b>{{a.nlots}} LOTE{{'' if a.nlots==1 else 'S'}}</b></li>{% endif %}<li class="ac2t">{{a.title}}</li></ul>
+{% set ast = astatus(a) %}{% if ast[1]=='upcoming' and a.start_ts %}<div class="ac2c">{{icon('clock',13)}} Abre em <span class="cd" data-end="{{a.start_ts}}"></span></div>{% elif a.nopen and a.next_end %}<div class="ac2c">{{icon('clock',13)}} Encerra em <span class="cd" data-end="{{a.next_end}}"></span></div>{% endif %}</div></a>
+{%- endmacro %}

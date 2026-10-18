@@ -1,0 +1,35 @@
+{% extends "base.html" %}{% block title %}Anunciar lote · SP Leilões{% endblock %}{% block body %}
+<div class="card pad" style="max-width:720px;margin:0 auto"><h1 style="margin-top:0;font-size:1.5rem;letter-spacing:-.02em">Anunciar um lote</h1>
+<p class="muted">Área do administrador. Publique um novo lote.</p>
+<form method="post" enctype="multipart/form-data" data-fotos><input type="hidden" name="csrf" value="{{csrf()}}">
+<label>Título</label><input name="titulo" required maxlength="120" value="{{f.get('titulo','')}}" placeholder="Ex.: Bicicleta aro 26 usada">
+<label>Descrição</label><textarea name="descricao" rows="4" placeholder="Estado, defeitos, o que acompanha...">{{f.get('descricao','')}}</textarea>
+<div class="row2"><div><label>Destaques do lote (etiquetas, separadas por vírgula)</label><input name="tags" maxlength="200" value="{{f.get('tags') or ''}}" placeholder="Ex.: Ar cond., Dir. hidráulica, Único dono"></div>
+<div><label>Observação curta (aparece no card)</label><input name="observacao" maxlength="60" value="{{f.get('observacao') or ''}}" placeholder="Ex.: Frota · Remarcado"></div></div>
+<div class="row2"><div><label>Categoria</label><select name="categoria">{% for c in CATEGORIAS %}<option {{'selected' if c==f.get('categoria')}}>{{c}}</option>{% endfor %}</select></div>
+<div><label>Leilão (opcional)</label><select name="leilao" id="leilao" onchange="tg()"><option value="">Lote avulso</option>{% for a in auctions %}<option value="{{a.id}}" {{'selected' if (f.get('leilao')|string)==(a.id|string)}}>{{a.title}} — {{a.end_ts|dm}}</option>{% endfor %}</select></div></div>
+<label>Ficha técnica (uma por linha, no formato <i>Campo: valor</i>)</label><textarea name="ficha" rows="5" placeholder="Ano/Modelo: 2016/2016&#10;Quilometragem: 48.000 km&#10;Combustível: gasolina">{{f.get('ficha','')}}</textarea>
+<div class="row2"><div><label>Avaliação (R$, opcional)</label><input name="avaliacao" inputmode="decimal" value="{{f.get('avaliacao','')}}"></div><div><label>Comissão do leiloeiro (%)</label><input name="comissao" inputmode="decimal" value="{{f.get('comissao','5')}}"></div></div>
+<label>Taxas</label><input name="taxas" value="{{f.get('taxas') or DEF_FEES}}">
+<div class="fotos" data-max="{{MAX_PHOTOS}}"><div class="fotos-head"><label style="margin:0">Fotos do lote (a primeira é a capa)</label><span class="fotos-count muted"></span></div>
+<input type="file" name="fotos" id="fotos-in" accept="image/*,.heic,.heif" multiple>
+<div class="fotos-prev"></div>
+<label for="fotos-in" class="btn ghost fotos-add">📷 Escolher fotos</label>
+<p class="muted fotos-hint">Até {{MAX_PHOTOS}} fotos — JPG, PNG, WEBP ou HEIC (iPhone), até 20 MB cada. Fotos grandes são reduzidas automaticamente. Toque em ★ para escolher a capa.</p>
+<progress class="fotos-bar" hidden max="1" value="0"></progress><p class="fotos-msg"></p></div>
+<div class="row2"><div><label>Lance inicial (R$)</label><input name="lance_inicial" inputmode="decimal" required value="{{f.get('lance_inicial','')}}" placeholder="100,00"></div>
+<div><label>Incremento mínimo (R$)</label><input name="incremento" inputmode="decimal" required value="{{f.get('incremento','10,00')}}"></div></div>
+<div id="term"><label>Término</label>
+<select name="duracao" onchange="document.getElementById('dt').style.display=this.value?'none':'block'">
+<option value="">Escolher data e hora</option><option value="5">Daqui a 5 minutos</option><option value="30">Daqui a 30 minutos</option>
+<option value="60">Daqui a 1 hora</option><option value="1440">Daqui a 1 dia</option><option value="4320">Daqui a 3 dias</option><option value="10080">Daqui a 7 dias</option></select>
+<div id="dt"><label class="muted">Data e hora de término (horário de Brasília)</label><input type="datetime-local" name="termino" value="{{f.get('termino','')}}"></div></div>
+<p class="muted" id="auctnote" style="display:none">No leilão, o término é automático: data do leilão + 2 min por lote, em sequência.</p>
+<details style="margin-top:14px"><summary style="cursor:pointer;font-weight:600">Condições de venda e retirada (opcional)</summary>
+<label>Condições de venda</label><textarea name="condicoes" rows="4">{{f.get('condicoes') or DEF_COND}}</textarea>
+<label>Retirada</label><textarea name="retirada" rows="3">{{f.get('retirada') or DEF_PICK}}</textarea></details>
+<p style="margin-top:20px"><button class="btn lg w">Publicar lote</button></p></form>
+{% if not auctions %}<p class="muted">Quer agrupar vários itens com a mesma data? <a href="/leiloes/novo">Crie um leilão</a>.</p>{% endif %}</div>
+<script>function tg(){const a=document.getElementById("leilao").value;document.getElementById("term").style.display=a?"none":"block";document.getElementById("auctnote").style.display=a?"block":"none"}tg()</script>
+<script src="/static/fotos.js?v={{VERSION}}"></script>
+{% endblock %}

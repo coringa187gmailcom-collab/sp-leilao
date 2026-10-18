@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% block title %}Notas de arrematação · Admin{% endblock %}{% block body %}
+<div class="crumb"><a href="/admin">Admin</a> › Notas</div>
+<div class="toolbar"><div><h1>Notas de arrematação</h1><span class="muted">Uma nota por lote arrematado e por cliente vencedor, gerada automaticamente quando o lote encerra.</span></div></div>
+<form class="card pad notafil" method="get"><div><label>Busca</label><input name="q" value="{{f.get('q','')}}" placeholder="Nº, cliente, e-mail ou lote"></div>
+<div><label>Cliente</label><select name="cliente"><option value="">Todos</option>{% for c in clients %}<option value="{{c.id}}" {{'selected' if f.get('cliente')==c.id|string}}>{{c.name}} ({{c.email}})</option>{% endfor %}</select></div>
+<div><label>Lote</label><select name="lote"><option value="">Todos</option>{% for l in lots %}<option value="{{l.id}}" {{'selected' if f.get('lote')==l.id|string}}>#{{l.id}} · {{l.title}}</option>{% endfor %}</select></div>
+<div><label>Situação</label><select name="status"><option value="">Todas</option>{% for s in NOTA_STATUS %}<option {{'selected' if f.get('status')==s}}>{{s}}</option>{% endfor %}</select></div>
+<div style="align-self:end;display:flex;gap:6px"><button class="btn sm">Filtrar</button><a class="btn ghost sm" href="/admin/notas">Limpar</a></div></form>
+<div class="card" style="overflow-x:auto;margin-top:14px">{% if not notas %}<div class="empty">Nenhuma nota encontrada.</div>{% else %}<table><tr><th>Nº</th><th>Lote</th><th>Cliente</th><th>Total</th><th>Situação</th><th>Emitida</th><th></th></tr>
+{% for r, t in notas %}<tr><td><b>{{num(r)}}</b></td><td><a href="/lote/{{r.lot_id}}">#{{r.lot_id}} · {{r.lot_title}}</a></td><td><a href="/admin/cliente/{{r.user_id}}">{{r.u_name}}</a><br><span class="muted">{{r.u_email}}</span></td>
+<td><b>{{t.total|brl}}</b></td><td><span class="nst {{r.status}}">{{r.status}}</span>{% if r.sent_at %}<br><span class="muted">✉ {{r.sent_at|dm}}</span>{% endif %}</td><td class="muted">{{r.issued_at|dm}}</td>
+<td style="white-space:nowrap"><a class="btn ghost sm" href="/admin/nota/{{r.id}}">Editar</a> <a class="btn ghost sm" href="/nota/{{r.id}}.pdf" target="_blank">PDF</a></td></tr>{% endfor %}</table>{% endif %}</div>
+<div class="card pad" style="margin-top:14px"><h2 style="margin-top:0;font-size:1.1rem">Gerar nota manualmente</h2>
+<p class="muted" style="margin-top:0">Escolha o lote e o cliente (vazio = vencedor do lote). Se a nota desse lote + cliente já existir, ela é aberta — marque “regenerar” para refazê-la com os dados atuais.</p>
+<form method="post" action="/admin/notas/gerar" class="notafil"><input type="hidden" name="csrf" value="{{csrf()}}">
+<div><label>Lote encerrado</label><select name="lote" required><option value="">Selecione…</option>{% for l in closed %}<option value="{{l.id}}">#{{l.id}} · {{l.title}}{% if l.w_name %} — vencedor: {{l.w_name}}{% else %} — sem lances{% endif %}</option>{% endfor %}</select></div>
+<div><label>Cliente</label><select name="cliente"><option value="">Vencedor do lote</option>{% for u in users %}<option value="{{u.id}}">{{u.name}} ({{u.email}})</option>{% endfor %}</select></div>
+<div style="align-self:end"><label style="display:flex;gap:6px;align-items:center;font-weight:600"><input type="checkbox" name="regenerar" value="1" style="width:auto"> Regenerar se já existir</label></div>
+<div style="align-self:end"><button class="btn sm" onclick="return !this.form.regenerar.checked || confirm('Regenerar descarta as edições da nota existente. Continuar?')">Gerar nota</button></div></form></div>
+{% endblock %}

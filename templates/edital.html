@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block title %}Edital · {{a.title}}{% endblock %}{% block body %}
+<div class="card pad prose" style="margin:0 auto"><div class="crumb"><a href="/leiloes">Leilões</a> › <a href="/leilao/{{a.id}}">Leilão nº {{auc_code(a)}}</a> › Edital</div>
+<h1 style="margin-top:0;font-size:1.5rem">Edital — Leilão nº {{auc_code(a)}}</h1><p><b>{{a.title}}</b></p>
+<div class="infogrid"><div><span>Abertura</span><b>{{a.start_ts|dt}}</b></div><div><span>Encerra a partir de</span><b>{{a.end_ts|dt}}</b></div><div><span>Modalidade</span><b>{{a.modality or 'Online'}}</b></div></div>
+<div style="white-space:pre-wrap">{{a.edital or DEF_EDITAL}}</div>
+{% if cfg.leiloeiro_nome %}<p class="muted" style="margin-top:18px">Leiloeiro oficial: {{cfg.leiloeiro_nome}}{% if cfg.leiloeiro_matricula %} — JUCESP nº {{cfg.leiloeiro_matricula}}{% endif %}</p>{% endif %}
+<div class="actions"><a class="btn hab" href="/leilao/{{a.id}}/habilitar">Habilite-se</a><a class="btn ghost" href="#" onclick="window.print();return false">Imprimir</a><a class="btn ghost" href="/leilao/{{a.id}}">Voltar ao leilão</a></div></div>{% endblock %}

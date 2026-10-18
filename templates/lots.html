@@ -1,0 +1,5 @@
+{% extends "base.html" %}{% from "_m.html" import lot_card, filters, sorter with context %}{% block title %}Lotes · SP Leilões{% endblock %}{% block body %}
+<div class="toolbar"><div><h1>{% if f.q %}Resultados para “{{f.q}}”{% elif f.cat %}{{f.cat}}{% elif f.grupo %}{% for g in GRUPOS if g[0]==f.grupo %}{{g[1]}}{% endfor %}{% else %}Todos os lotes{% endif %}</h1><span class="muted">{{lots|length}} lote{{'' if lots|length==1 else 's'}}</span></div>{{sorter(f,'/lotes')}}</div>
+<div class="layout">{{filters(f,'/lotes')}}
+<div>{% if lots %}<div class="grid">{% for l in lots %}{{lot_card(l, favs)}}{% endfor %}</div>{% else %}<div class="card empty">Nenhum lote encontrado com esses filtros.<br><a href="/lotes">Limpar filtros</a></div>{% endif %}</div></div>
+{% endblock %}

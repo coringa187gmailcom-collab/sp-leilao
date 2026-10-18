@@ -1,0 +1,127 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Nota de Arrematação nº {{num}}</title>
+<style>
+@page{size:A4;margin:8mm 11mm 7mm}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Roboto,sans-serif;color:#1c1e22;font-size:9.1pt;line-height:1.38}
+.page{position:relative}
+.wm{position:absolute;top:44%;left:50%;transform:translate(-50%,-50%) rotate(-32deg);font-size:96pt;font-weight:900;color:rgba(180,20,28,.085);white-space:nowrap;letter-spacing:4px;z-index:5;text-align:center;line-height:1.1}
+.wm small{display:block;font-size:40pt;letter-spacing:6px}
+.c{position:relative;z-index:1}
+.ban_unused{background:#fff4d6;border:1px solid #f1d58a;border-left:5px solid #d42a32;color:#7a0c12;font-weight:700;font-size:8.2pt;padding:4px 8px;border-radius:4px;margin-bottom:6px;text-align:center;letter-spacing:.02em}
+header{display:flex;justify-content:space-between;align-items:stretch;background:#17181c;color:#fff;border-radius:8px;overflow:hidden}
+.hl{display:flex;gap:10px;align-items:center;padding:9px 12px;flex:none}.hl svg{flex:none}.wmk{white-space:nowrap}
+.wmk b{display:block;font-size:17pt;font-weight:900;letter-spacing:.02em;line-height:1}
+.wmk b i{font-style:normal;color:#e0363e}
+.wmk small{display:block;font-size:7pt;letter-spacing:.28em;text-transform:uppercase;color:#b9bcc4;margin-top:3px}
+.co{flex:1;font-size:7.9pt;color:#d6d8dd;line-height:1.4;padding:8px 12px;border-left:1px solid #2e3036}
+.co strong{color:#fff}
+.hr{background:linear-gradient(135deg,#d42a32,#8f0f16);padding:9px 14px;text-align:right;min-width:52mm;display:flex;flex-direction:column;justify-content:center}
+.hr .t{font-size:11.5pt;font-weight:900;letter-spacing:.04em;line-height:1.1}
+.hr .n{font-size:8pt;margin-top:4px;color:#ffe3e4}
+.hr .n b{color:#fff}
+h2{font-size:9pt;margin:0 0 4px;color:#b4141c;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px}
+h2 span{background:#b4141c;color:#fff;border-radius:50%;width:15px;height:15px;display:inline-block;text-align:center;line-height:15px;font-size:7.4pt;flex:none}
+.box{border:1px solid #e4e5e9;border-radius:7px;padding:8px 10px;background:#fff;margin-top:8px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 8px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:1.5px 8px}
+dt{color:#5f636c}dd{margin:0;font-weight:600}
+.desc{margin-top:5px;background:#f6f7f9;border-radius:5px;padding:5px 7px;font-size:8.8pt}
+table{width:100%;border-collapse:collapse}
+td{padding:3.2px 4px;border-bottom:1px solid #eceef1}
+td.v{text-align:right;font-weight:600;white-space:nowrap}
+tr.tot td{background:#17181c;color:#fff;font-weight:800;font-size:10.4pt;border:0;padding:5px 6px}
+tr.tot td.v{color:#fff}
+ul{margin:2px 0 0;padding-left:13px}li{margin:1.2px 0}
+.warn{background:#fdeced;border-left:3px solid #b4141c;padding:4px 7px;border-radius:4px;margin-top:4px;font-size:8.6pt}
+.pix{display:flex;gap:8px;align-items:center}
+.qr{width:56px;height:56px;flex:none;border:1px dashed #9a9ea7;border-radius:5px;display:grid;place-items:center;font-size:6.4pt;color:#5f636c;text-align:center;background:repeating-linear-gradient(45deg,#f3f4f6 0 4px,#fff 4px 8px)}
+.sig{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:24px;text-align:center;font-size:8.6pt}
+.sig div{border-top:1px solid #1c1e22;padding-top:3px}
+.sig b{display:block}
+footer{margin-top:8px;font-size:7.4pt;color:#5f636c;text-align:center;border-top:1px solid #e4e5e9;padding-top:4px}
+.small{font-size:8.3pt;color:#3a3d44}
+
+.qr img{width:100%;height:100%}.qr.real{border:0;background:none}
+.pixcode{font-family:monospace;font-size:6.6pt;word-break:break-all;color:#3a3d44;margin-top:3px;background:#f6f7f9;border-radius:4px;padding:3px 5px}
+.stamp{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%) rotate(-24deg);font-size:72pt;font-weight:900;letter-spacing:6px;border:8px solid;border-radius:18px;padding:0 22px;z-index:5;opacity:.16}
+.stamp.Cancelada{color:#b4141c}.stamp.Paga,.stamp.Retirada{color:#1d8a4e}
+.obs{margin-top:8px}
+@media screen{body{background:#e9eaee;padding:18px 0}.page{width:210mm;min-height:297mm;margin:0 auto;background:#fff;padding:8mm 11mm 7mm;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+.tools{width:210mm;margin:0 auto 10px;display:flex;gap:8px;justify-content:flex-end;font-family:Inter,Arial,sans-serif}.tools a{background:#b4141c;color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-weight:700;font-size:10pt}.tools a.g{background:#fff;color:#1c1e22;border:1px solid #ccc}
+body.embed{padding:0;background:#fff}body.embed .page{box-shadow:none;margin:0}}
+@media screen and (max-width:820px){body:not(.embed) .page{width:auto;min-height:0;margin:0 8px}.tools{width:auto;margin:0 8px 10px}body:not(.embed) .row{grid-template-columns:1fr}body:not(.embed) header{flex-wrap:wrap}}
+@media print{.tools{display:none}body{background:#fff;padding:0}.page{box-shadow:none;padding:0}}
+</style></head><body class="{{'embed' if embed}}">
+{% if not pdf and not embed %}<div class="tools"><a class="g" href="{{'/admin/nota/' ~ n.id if me.is_admin else '/minha-conta'}}">← Voltar</a><a href="/nota/{{n.id}}.pdf?baixar=1">Baixar PDF</a></div>{% endif %}
+<div class="page">{% if n.status in ('Cancelada','Paga','Retirada') %}<div class="stamp {{n.status}}">{{n.status|upper}}</div>{% endif %}
+<div class="c">
+<header>
+ <div class="hl"><svg width="44" height="44" viewBox="0 0 48 48"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e0363e"/><stop offset="1" stop-color="#8f0f16"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#lg)"/><g fill="#fff"><g transform="rotate(-40 24 21)"><rect x="14" y="12" width="19" height="8" rx="2"/><rect x="11.5" y="10" width="4.5" height="12" rx="1.6"/><rect x="31" y="10" width="4.5" height="12" rx="1.6"/><rect x="22" y="19" width="3.6" height="17" rx="1.8"/></g><rect x="9" y="36.5" width="18" height="4.2" rx="2.1"/></g></svg>
+  <div class="wmk"><b><i>SP</i> LEILÕES</b><small>Leilões Online</small></div>
+ </div>
+ <div class="co">
+  {% if d.emp_razao %}<strong>Razão social:</strong> {{d.emp_razao}}<br>{% endif %}
+  {% if d.emp_cnpj %}<strong>CNPJ:</strong> {{d.emp_cnpj}}<br>{% endif %}
+  {% if d.emp_leiloeiro %}<strong>Leiloeiro oficial:</strong> {{d.emp_leiloeiro}}{% if d.emp_jucesp %} — JUCESP nº {{d.emp_jucesp}}{% endif %}<br>{% endif %}
+  {% if d.emp_contato %}<strong>Contato:</strong> {{d.emp_contato}}<br>{% endif %}
+  {{d.emp_site}}
+ </div>
+ <div class="hr"><div class="t">NOTA DE<br>ARREMATAÇÃO</div><div class="n">Nº <b>{{num}}</b><br>Emitida em <b>{{issued}}</b></div></div>
+</header>
+
+<div class="row">
+<div class="box"><h2><span>1</span>Dados do leilão e do lote</h2>
+ <dl><dt>Leilão nº</dt><dd>{{d.leilao_num}}</dd><dt>Data</dt><dd>{{d.leilao_data}}</dd><dt>Modalidade</dt><dd>{{d.modalidade}}</dd><dt>Lote nº</dt><dd>{{d.lote_num}}</dd>{% if d.comitente %}<dt>Comitente</dt><dd>{{d.comitente}}</dd>{% endif %}</dl>
+ <div class="desc"><b>Descrição:</b> {{d.descricao}}</div>
+</div>
+<div class="box"><h2><span>2</span>Dados do arrematante</h2>
+ <dl><dt>Nome</dt><dd>{{d.arr_nome}}</dd><dt>CPF</dt><dd>{{d.arr_cpf or '—'}}</dd>{% if d.arr_rg %}<dt>RG</dt><dd>{{d.arr_rg}}</dd>{% endif %}<dt>Endereço</dt><dd>{{(d.arr_endereco or '—')|e|replace('\n', '<br>'|safe)}}</dd>{% if d.arr_whatsapp %}<dt>WhatsApp</dt><dd>{{d.arr_whatsapp}}</dd>{% endif %}<dt>E-mail</dt><dd>{{d.arr_email}}</dd></dl>
+ <div class="small" style="margin-top:4px">Dados conforme ficha cadastral do arrematante no site.</div>
+</div>
+</div>
+
+<div class="row">
+<div class="box"><h2><span>3</span>Valores</h2>
+ <table>
+  <tr><td>Lance vencedor (arremate)</td><td class="v">{{t.lance|brl}}</td></tr>
+  <tr><td>Comissão do leiloeiro ({{('%g' % t.pct)|replace('.',',')}}% do lance)</td><td class="v">{{t.com|brl}}</td></tr>
+  {% if t.adm %}<tr><td>Taxa administrativa</td><td class="v">{{t.adm|brl}}</td></tr>{% endif %}
+  {% if t.pat %}<tr><td>Taxa de pátio ({{d.patio_diarias}} diária{{'' if d.patio_diarias==1 else 's'}} × {{d.patio_valor|brl}})</td><td class="v">{{t.pat|brl}}</td></tr>{% endif %}
+  {% for o in t.outras %}<tr><td>{{o.desc or 'Outras despesas'}}</td><td class="v">{{(o.valor or 0)|brl}}</td></tr>{% endfor %}
+  <tr class="tot"><td>TOTAL A PAGAR</td><td class="v">{{t.total|brl}}</td></tr>
+ </table>
+ <div class="small" style="margin-top:4px">Taxas e percentuais conforme o edital do leilão.</div>
+</div>
+<div class="box"><h2><span>4</span>Pagamento</h2>
+ <div class="pix">{% if qr %}<div class="qr real"><img src="{{qr}}" alt="QR Code PIX"></div>{% endif %}
+ <dl>{% if d.pix %}<dt>PIX</dt><dd>{{d.pix}}</dd>{% endif %}{% if d.banco %}<dt>Banco</dt><dd>{{d.banco}}</dd>{% endif %}{% if d.agencia_conta %}<dt>Ag. / Conta</dt><dd>{{d.agencia_conta}}</dd>{% endif %}{% if d.favorecido and (d.pix or d.banco) %}<dt>Favorecido</dt><dd>{{d.favorecido}}</dd>{% endif %}{% if not d.pix and not d.banco %}<dt>Dados</dt><dd>Informados pela {{d.emp_razao or 'SP Leilões'}} após o leilão.</dd>{% endif %}</dl></div>
+ {% if pix %}<div class="pixcode"><b>PIX copia e cola:</b> {{pix}}</div>{% endif %}
+ <div style="margin-top:4px"><b>Prazo:</b> até <b>{{d.prazo_pagamento}}</b>. Envie o comprovante pelo WhatsApp ou e-mail.</div>
+ <div class="warn"><b>Se não pagar no prazo:</b> o arremate é cancelado, o arrematante perde o direito ao bem e fica sujeito à multa prevista no edital ({{('%g' % d.multa_pct)|replace('.',',')}}% do lance) e ao bloqueio do cadastro.</div>
+</div>
+</div>
+
+<div class="row">
+<div class="box"><h2><span>5</span>Retirada do bem</h2>
+ <dl>{% if d.retirada_local %}<dt>Local</dt><dd>{{d.retirada_local}}</dd>{% endif %}{% if d.retirada_horarios %}<dt>Horários</dt><dd>{{d.retirada_horarios}}</dd>{% endif %}<dt>Prazo</dt><dd>{{d.prazo_retirada}}</dd></dl>
+ {% if lines('levar') %}<div style="margin-top:3px"><b>Levar:</b></div><ul>{% for x in lines('levar') %}<li>{{x}}</li>{% endfor %}</ul>{% endif %}
+ <div class="small">Após o prazo, podem ser cobradas novas diárias de pátio.</div>
+</div>
+<div class="box"><h2><span>6</span>Documentação após o pagamento</h2>
+ <ul>{% for x in lines('documentacao') %}<li>{{x}}</li>{% endfor %}</ul>
+</div>
+</div>
+
+<div class="box"><h2><span>7</span>Condições gerais</h2>
+ <ul>{% for x in lines('condicoes') %}<li>{{x}}</li>{% endfor %}
+  {% if d.emp_contato %}<li>Dúvidas: {{d.emp_contato}}.</li>{% endif %}</ul>
+ {% if d.observacoes %}<div class="obs"><b>Observações:</b> {{d.observacoes|e|replace('\n', '<br>'|safe)}}</div>{% endif %}
+</div>
+
+<div class="sig">
+ <div><b>{{d.emp_leiloeiro or d.emp_razao}}</b>{% if d.emp_leiloeiro %}Leiloeiro Oficial{% if d.emp_jucesp %} — JUCESP nº {{d.emp_jucesp}}{% endif %}{% else %}Leiloeiro / responsável{% endif %}</div>
+ <div><b>{{d.arr_nome}}</b>Arrematante{% if d.arr_cpf %} — CPF {{d.arr_cpf}}{% endif %}</div>
+</div>
+<footer>{{d.emp_razao or 'SP Leilões'}} · Nota de Arrematação nº {{num}} · {% if d.emp_cidade %}{{d.emp_cidade}}, {% endif %}{{issued}}{% if n.status!='Pendente' %} · Situação: {{n.status}}{% endif %}</footer>
+</div></div>{% if embed %}<script>function fz(){const pg=document.querySelector('.page');pg.style.zoom=Math.min(1,innerWidth/800)}fz();addEventListener('resize',fz)</script>{% endif %}</body></html>
