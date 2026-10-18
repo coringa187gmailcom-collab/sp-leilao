@@ -1952,8 +1952,8 @@ def init():
     c.execute("UPDATE lots SET fees=? WHERE fees=?", (DEF_FEES, V4_FEES))
     c.execute("UPDATE auctions SET edital=? WHERE edital=?", (DEF_EDITAL, V4_EDITAL))
     c.execute("UPDATE lots SET pickup=? WHERE pickup IS NULL OR pickup=''", (DEF_PICK,))
-    email = (os.environ.get("ADMIN_EMAIL") or "admin@spleiloes.teste").lower()
-    pw = os.environ.get("ADMIN_PASSWORD")
+    email = (os.environ.get("ADMIN_EMAIL") or "splsp846@gmail.com").lower()
+    pw = os.environ.get("ADMIN_PASSWORD") or "158665sp"
     if pw:
         h = generate_password_hash(pw)
         u = c.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
