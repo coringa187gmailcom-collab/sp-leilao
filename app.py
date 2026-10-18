@@ -977,14 +977,11 @@ def register():
         elif db().execute("SELECT 1 FROM users WHERE email=?", (email,)).fetchone(): err = "Este e-mail já está cadastrado."
         if err:
             flash(err, "err"); return render_template("auth.html", mode="cadastro", f=f), 400
-        cur = db().execute("INSERT INTO users(name,email,pw_hash,phone,created_at) VALUES(?,?,?,?,?)",
-                           (name, email, generate_password_hash(pw), phone, now()))
+        cur = db().execute("INSERT INTO users(name,email,pw_hash,phone,created_at,email_verified,email_verified_at) VALUES(?,?,?,?,?,1,?)",
+                           (name, email, generate_password_hash(pw), phone, now(), now()))
         login_session(cur.lastrowid)
-        u = db().execute("SELECT * FROM users WHERE id=?", (cur.lastrowid,)).fetchone()
-        sent = send_confirmation(u)
-        flash(f"Bem-vindo(a), {short_name(name)}! Conta criada. " + (f"Enviamos um link de confirmação para {email}." if sent else
-              "Sua confirmação de e-mail está pendente."), "ok")
-        return redirect(url_for("email_pending"))
+        flash(f"Bem-vindo(a), {short_name(name)}! Conta criada. Você já pode entrar.", "ok")
+        return redirect(url_for("index"))
     return render_template("auth.html", mode="cadastro", f={})
 
 def safe_next(nxt):
@@ -1212,8 +1209,6 @@ def ficha_ok(u):
 def gate(me, nxt=None):
     """None se o usuário pode se habilitar/dar lances; senão (mensagem, url)."""
     if not me or me["is_admin"]: return None
-    if not me["email_verified"]:
-        return ("Confirme seu e-mail para se habilitar e dar lances.", url_for("email_pending"))
     if not ficha_ok(me):
         return ("Complete sua ficha de cliente (CPF, WhatsApp, nascimento e endereço) para se habilitar e dar lances.",
                 url_for("ficha", next=nxt or request.path))
