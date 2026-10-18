@@ -787,10 +787,11 @@ def new_lot():
         if err:
             return form_error(err, "new_lot.html", f=f, auctions=auctions, DEF_COND=DEF_COND, DEF_PICK=DEF_PICK, DEF_FEES=DEF_FEES)
         x = lot_extra(f)
-        cur = c.execute("INSERT INTO lots(seller_id,title,description,category,start_cents,inc_cents,end_ts,created_at,auction_id,lot_number,conditions,pickup,specs,appraisal_cents,commission_pct,fees,tags,note) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        cur = c.execute("INSERT INTO lots(seller_id,title,description,category,start_cents,inc_cents,end_ts,created_at,auction_id,lot_number,conditions,pickup,specs,appraisal_cents,commission_pct,fees,tags,note,hidden) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                         (me["id"], title, desc, cat, start, inc, end_ts, now(), aid if auc else None, lot_number,
                          (f.get("condicoes") or DEF_COND).strip()[:3000], (f.get("retirada") or DEF_PICK).strip()[:2000],
-                         x["specs"], x["appraisal_cents"], x["commission_pct"], x["fees"], x["tags"], x["note"]))
+                         x["specs"], x["appraisal_cents"], x["commission_pct"], x["fees"], x["tags"], x["note"],
+                         1 if f.get("oculto") else 0))
         for i, n in enumerate(saved):
             c.execute("INSERT INTO photos(lot_id,filename,pos) VALUES(?,?,?)", (cur.lastrowid, n, i))
         flash("Lote publicado!" + (f" {len(saved)} foto(s) adicionada(s)." if saved else ""), "ok")

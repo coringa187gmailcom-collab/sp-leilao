@@ -28,6 +28,7 @@
 <details style="margin-top:14px"><summary style="cursor:pointer;font-weight:600">Condições de venda e retirada (opcional)</summary>
 <label>Condições de venda</label><textarea name="condicoes" rows="4">{{f.get('condicoes') or DEF_COND}}</textarea>
 <label>Retirada</label><textarea name="retirada" rows="3">{{f.get('retirada') or DEF_PICK}}</textarea></details>
+<p style="margin-top:14px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" name="oculto" value="1" {{'checked' if f.get('oculto')}}> <strong>Lote de teste (oculto)</strong> — só o admin vê</label></p>
 <p style="margin-top:20px"><button class="btn lg w">Publicar lote</button></p></form>
 {% if not auctions %}<p class="muted">Quer agrupar vários itens com a mesma data? <a href="/leiloes/novo">Crie um leilão</a>.</p>{% endif %}</div>
 <script>function tg(){const a=document.getElementById("leilao").value;document.getElementById("term").style.display=a?"none":"block";document.getElementById("auctnote").style.display=a?"block":"none"}tg()</script>
