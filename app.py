@@ -1985,7 +1985,8 @@ def init():
             c.execute("UPDATE users SET email=?, pw_hash=? WHERE id=?", (email, h, adm["id"]))
             print(f"Admin e-mail migrado: {old_email} → {email}", flush=True)
         else:
-            c.execute("INSERT INTO users(name,email,pw_hash,is_admin,created_at) VALUES('Pedro (Admin)',?,?,1,?)", (email, h, now()))
+            c.execute("INSERT INTO users(name,email,pw_hash,is_admin,created_at) VALUES('Chefe',?,?,1,?)", (email, h, now()))
+    c.execute("UPDATE users SET name='Chefe' WHERE is_admin=1")
     c.execute("UPDATE users SET email_verified=1, email_verified_by=COALESCE(email_verified_by,'admin') WHERE is_admin=1 AND COALESCE(email_verified,0)=0")
     if os.environ.get("ADMIN_2FA_RESET") == "1":
         c.execute("UPDATE users SET totp_secret=NULL, totp_enabled=0, recovery_hashes='[]' WHERE email=?", (email,))
