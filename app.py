@@ -828,6 +828,17 @@ def process_image(data, fn):
         if im.mode in ("RGBA", "LA", "P", "PA"):
             im = im.convert("RGBA"); bg = Image.new("RGB", im.size, (255, 255, 255)); bg.paste(im, mask=im.split()[-1]); im = bg
         im = im.convert("RGB"); im.thumbnail((PHOTO_SIDE, PHOTO_SIDE), Image.LANCZOS)
+        # Marca d'água: logo SP Leilões no canto inferior direito
+        try:
+            logo_path = os.path.join(BASE, "static", "logo_wm.png")
+            if os.path.exists(logo_path):
+                logo = Image.open(logo_path).convert("RGBA")
+                lw = max(60, im.width // 12)
+                logo.thumbnail((lw, lw), Image.LANCZOS)
+                pos = (im.width - logo.width - 15, im.height - logo.height - 15)
+                im.paste(logo, pos, logo)
+        except Exception:
+            pass
         out = io.BytesIO(); im.save(out, "JPEG", quality=85, optimize=True, progressive=True); out = out.getvalue()
         chk = Image.open(io.BytesIO(out)); chk.verify()                       # confere o resultado
         if chk.format != "JPEG": raise ValueError("saída inválida")
@@ -1974,8 +1985,7 @@ def init():
             c.execute("UPDATE users SET email=?, pw_hash=? WHERE id=?", (email, h, adm["id"]))
             print(f"Admin e-mail migrado: {old_email} → {email}", flush=True)
         else:
-            c.execute("INSERT INTO users(name,email,pw_hash,is_admin,created_at) VALUES('Chefe',?,?,1,?)", (email, h, now()))
-    c.execute("UPDATE users SET name='Chefe' WHERE is_admin=1 AND name LIKE '%Pedro%'")
+            c.execute("INSERT INTO users(name,email,pw_hash,is_admin,created_at) VALUES('Pedro (Admin)',?,?,1,?)", (email, h, now()))
     c.execute("UPDATE users SET email_verified=1, email_verified_by=COALESCE(email_verified_by,'admin') WHERE is_admin=1 AND COALESCE(email_verified,0)=0")
     if os.environ.get("ADMIN_2FA_RESET") == "1":
         c.execute("UPDATE users SET totp_secret=NULL, totp_enabled=0, recovery_hashes='[]' WHERE email=?", (email,))
