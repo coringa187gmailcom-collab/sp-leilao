@@ -12,3 +12,5 @@ Variáveis: `SECRET_KEY`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DATA_DIR` (ou volume
   Emergência: variável `ADMIN_2FA_RESET=1` no Railway desativa o 2FA do admin no boot (remova depois).
 - Backup diário automático (SQLite online backup + fotos) em `$DATA_DIR/backups`, mantém os 7 últimos; download no admin.
 - Cookies Secure/HttpOnly/SameSite=Lax, CSRF, HSTS, X-Frame-Options, nosniff, Referrer-Policy, validação real de imagens (≤ 8 MB), sessão de admin expira após 30 min sem uso.
+
+<!-- force deploy 1793226774.9781897 -->
