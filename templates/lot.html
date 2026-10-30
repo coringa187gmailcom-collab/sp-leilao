@@ -100,6 +100,17 @@ document.getElementById("hist").innerHTML=d.bids.length?d.bids.map((b,i)=>`<tr c
 if(d.status!=="open"&&STATUS==="open"){location.reload()}STATUS=d.status;}catch(e){}}
 setInterval(poll,3000);
 setInterval(()=>{if(STATUS==="open"&&(Date.now()+OFF)/1000>=+document.getElementById("cd").dataset.end+1)poll()},1000);
+// Formatação automática do campo de lance
+const valInput = document.getElementById("val");
+if(valInput){
+  valInput.addEventListener("input", function(e){
+    let v = this.value.replace(/\D/g, "");
+    if(!v) { this.value = ""; return; }
+    v = (parseInt(v, 10) / 100).toFixed(2);
+    this.value = v.replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  });
+  valInput.addEventListener("focus", function(){ this.select(); });
+}
 const bf=document.getElementById("bf");if(bf)bf.addEventListener("submit",async e=>{e.preventDefault();const m=document.getElementById("bmsg");const v=document.getElementById("val").value;
 if(!confirm("Confirmar lance de R$ "+v+"?"))return;
 const r=await fetch(bf.action,{method:"POST",body:new FormData(bf),headers:{"X-Requested-With":"fetch"}});const d=await r.json().catch(()=>({msg:"Erro"}));
