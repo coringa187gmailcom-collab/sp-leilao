@@ -51,7 +51,12 @@
   {% elif me %}<form id="bf" method="post" action="/lote/{{l.id}}/lance" style="margin-top:14px"><input type="hidden" name="csrf" value="{{csrf()}}">
    <div class="lbl">Lance rápido</div><div class="quick" id="quick"></div>
    <label style="margin-top:6px">Seu lance (mínimo <span id="mn">{{st.min_next|brl}}</span>)</label>
-   <div class="bidrow"><input id="val" name="valor" inputmode="decimal" value="{{'%.2f'|format(st.min_next/100)|replace('.',',')}}"><button class="btn">{{icon('gavel',18)}} Dar lance</button></div>
+   <div class="bidrow" style="display:flex;gap:6px;align-items:center">
+  <button type="button" class="btn ghost" id="minus" style="padding:8px 12px;font-size:1.2rem">−</button>
+  <input id="val" name="valor" inputmode="decimal" value="{{'%.2f'|format(st.min_next/100)|replace('.',',')}}" style="flex:1;text-align:center;font-size:1.1rem">
+  <button type="button" class="btn ghost" id="plus" style="padding:8px 12px;font-size:1.2rem">+</button>
+  <button class="btn">{{icon('gavel',18)}} Dar lance</button>
+</div>
    <div id="bmsg" style="margin-top:10px"></div></form>
   {% else %}<a class="btn w lg" style="margin-top:14px" href="/entrar?next=/lote/{{l.id}}">Entrar para dar lance</a><a class="btn hab w" style="margin-top:8px" href="/cadastro">Habilite-se (cadastro grátis)</a><p class="muted" style="text-align:center">Não tem conta? <a href="/cadastro">Cadastre-se</a></p>{% endif %}
  </div>
@@ -85,7 +90,7 @@ function openLb(){if(!PH.length)return;setImg(IDX);document.getElementById("lb")
 function step(d){setImg(IDX+d)}document.addEventListener("keydown",e=>{if(!document.getElementById("lb").classList.contains("on"))return;if(e.key==="Escape")closeLb();if(e.key==="ArrowLeft")step(-1);if(e.key==="ArrowRight")step(1)});
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x===b));document.querySelectorAll(".tabpane").forEach(p=>p.classList.toggle("on",p.id==="t-"+b.dataset.t))});
 function esc(s){const d=document.createElement("div");d.textContent=s;return d.innerHTML}
-function quick(){const q=document.getElementById("quick");if(!q)return;q.innerHTML=[0,1,4].map(k=>{const v=MIN+k*INC;return`<button type="button" data-v="${v}">${brl(v)}</button>`}).join("");
+function quick(){const q=document.getElementById("quick");if(!q)return;q.innerHTML=[0,1,2,5].map(k=>{const v=MIN+k*INC;const label=k===0?"Mínimo":k===1?"+1":k===2?"+2":"+5";return`<button type="button" data-v="${v}" style="padding:8px 14px;font-weight:600">${label}<br><small>${brl(v)}</small></button>`}).join("");
 q.querySelectorAll("button").forEach(b=>b.onclick=()=>{document.getElementById("val").value=(b.dataset.v/100).toFixed(2).replace(".",",")})}
 quick();
 async function poll(){try{const r=await fetch("/api/lote/"+LID,{cache:"no-store"});const d=await r.json();
@@ -100,17 +105,37 @@ document.getElementById("hist").innerHTML=d.bids.length?d.bids.map((b,i)=>`<tr c
 if(d.status!=="open"&&STATUS==="open"){location.reload()}STATUS=d.status;}catch(e){}}
 setInterval(poll,3000);
 setInterval(()=>{if(STATUS==="open"&&(Date.now()+OFF)/1000>=+document.getElementById("cd").dataset.end+1)poll()},1000);
-// Formatação automática do campo de lance
+// Formatação automática + botões + validação
 const valInput = document.getElementById("val");
+const minusBtn = document.getElementById("minus");
+const plusBtn = document.getElementById("plus");
+function formatVal(cents){
+  return (cents/100).toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+function parseVal(str){
+  return Math.round(parseFloat(str.replace(/\./g,"").replace(",",".")) * 100) || 0;
+}
 if(valInput){
-  valInput.addEventListener("input", function(e){
+  valInput.addEventListener("input", function(){
     let v = this.value.replace(/\D/g, "");
     if(!v) { this.value = ""; return; }
-    v = (parseInt(v, 10) / 100).toFixed(2);
-    this.value = v.replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    this.value = formatVal(parseInt(v, 10));
   });
   valInput.addEventListener("focus", function(){ this.select(); });
+  valInput.addEventListener("blur", function(){
+    let cents = parseVal(this.value);
+    if(cents < MIN) { this.value = formatVal(MIN); }
+  });
 }
+if(minusBtn) minusBtn.onclick = ()=>{
+  let cents = parseVal(valInput.value);
+  cents = Math.max(MIN, cents - INC);
+  valInput.value = formatVal(cents);
+};
+if(plusBtn) plusBtn.onclick = ()=>{
+  let cents = parseVal(valInput.value);
+  valInput.value = formatVal(cents + INC);
+};
 const bf=document.getElementById("bf");if(bf)bf.addEventListener("submit",async e=>{e.preventDefault();const m=document.getElementById("bmsg");const v=document.getElementById("val").value;
 if(!confirm("Confirmar lance de R$ "+v+"?"))return;
 const r=await fetch(bf.action,{method:"POST",body:new FormData(bf),headers:{"X-Requested-With":"fetch"}});const d=await r.json().catch(()=>({msg:"Erro"}));
