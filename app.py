@@ -479,7 +479,26 @@ def my_favs():
 def health(): return {"ok": True, "app": "sp-leiloes", "version": VERSION}
 
 @app.get("/uploads/<path:name>")
-def uploads(name): return send_from_directory(UPLOADS, name, max_age=86400)
+def uploads(name):
+    """Serve fotos com logo SP Leilões no canto inferior direito."""
+    path = os.path.join(UPLOADS, name)
+    if not os.path.exists(path):
+        abort(404)
+    try:
+        im = Image.open(path).convert("RGB")
+        logo_path = os.path.join(BASE, "static", "logo_wm.png")
+        if os.path.exists(logo_path):
+            logo = Image.open(logo_path).convert("RGBA")
+            lw = max(120, im.width // 6)
+            logo.thumbnail((lw, lw), Image.LANCZOS)
+            pos = (im.width - logo.width - 15, im.height - logo.height - 15)
+            im.paste(logo, pos, logo)
+        out = io.BytesIO()
+        im.save(out, "JPEG", quality=85)
+        out.seek(0)
+        return send_file(out, mimetype="image/jpeg", max_age=86400)
+    except Exception:
+        return send_from_directory(UPLOADS, name, max_age=86400)
 
 def site_img(slug):
     fn = get_cfg().get("img_" + slug)
