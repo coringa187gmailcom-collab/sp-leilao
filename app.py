@@ -480,24 +480,38 @@ def health(): return {"ok": True, "app": "sp-leiloes", "version": VERSION}
 
 @app.get("/uploads/<path:name>")
 def uploads(name):
-    """Serve fotos com logo SP Leilões no canto inferior direito."""
+    """Serve fotos com logo SP LEILÕES grande no canto inferior direito."""
     path = os.path.join(UPLOADS, name)
     if not os.path.exists(path):
         abort(404)
     try:
         im = Image.open(path).convert("RGB")
-        logo_path = os.path.join(BASE, "static", "logo_wm.png")
-        if os.path.exists(logo_path):
-            logo = Image.open(logo_path).convert("RGBA")
-            lw = max(200, im.width // 3)
-            logo.thumbnail((lw, lw), Image.LANCZOS)
-            pos = (im.width - logo.width - 15, im.height - logo.height - 15)
-            im.paste(logo, pos, logo)
+        # Logo embutido: retângulo vermelho com texto
+        from PIL import ImageDraw, ImageFont
+        lw = max(180, im.width // 4)
+        lh = max(50, lw // 4)
+        logo = Image.new("RGBA", (lw, lh), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(logo)
+        draw.rounded_rectangle([0, 0, lw-1, lh-1], radius=8, fill=(224, 54, 62, 240))
+        try:
+            font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", max(16, lh // 2))
+        except:
+            font = ImageFont.load_default()
+        text = "SP LEILÕES"
+        bbox = draw.textbbox((0, 0), text, font=font)
+        tw = bbox[2] - bbox[0]
+        x = (lw - tw) // 2
+        y = (lh - (bbox[3] - bbox[1])) // 2 - 2
+        draw.text((x, y), text, fill=(255, 255, 255, 255), font=font)
+        pos = (im.width - lw - 10, im.height - lh - 10)
+        im.paste(logo, pos, logo)
         out = io.BytesIO()
         im.save(out, "JPEG", quality=85)
         out.seek(0)
-        return send_file(out, mimetype="image/jpeg", max_age=86400)
-    except Exception:
+        from flask import send_file
+        return send_file(out, mimetype="image/jpeg", max_age=3600)
+    except Exception as e:
+        print("watermark err:", e, flush=True)
         return send_from_directory(UPLOADS, name, max_age=86400)
 
 def site_img(slug):
