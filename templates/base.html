@@ -27,7 +27,7 @@
 {% with ms = get_flashed_messages(with_categories=true) %}{% for c,m in ms %}<div class="flash {{c}}">{{m}}</div>{% endfor %}{% endwith %}
 {% block body %}{% endblock %}</main>
 <footer class="ft"><div class="wrap"><div class="cols">
-<div class="fbrand"><a class="brand" href="/">{{logo_mark(44)}}{{wordmark()}}</a><p>Leilões online de veículos, motos, caminhões, sinistros, imóveis e materiais. Lances em tempo real, com habilitação por leilão e prorrogação automática no fim de cada lote.</p>
+<div class="fbrand"><a class="brand" href="/">{{logo_mark(44)}}{{wordmark()}}</a><p>Leilões online e presencial de veículos, motos, caminhões, sinistros, imóveis e materiais. Lances em tempo real, com habilitação por leilão e prorrogação automática no fim de cada lote.</p>
 {% if cfg.leiloeiro_nome %}<p class="fsmall">Leiloeiro oficial: <b>{{cfg.leiloeiro_nome}}</b>{% if cfg.leiloeiro_matricula %} · JUCESP nº {{cfg.leiloeiro_matricula}}{% endif %}</p>{% endif %}</div>
 <div><h5>Leilões</h5><a href="/leiloes">Todos os leilões</a><a href="/agenda">Agenda</a><a href="/lotes?status=encerrando">Encerrando</a><a href="/lotes?status=encerrados">Encerrados</a></div>
 <div><h5>Categorias</h5>{% for c in CATEGORIAS %}<a href="/lotes?cat={{c|urlencode}}">{{c}}</a>{% endfor %}</div>
