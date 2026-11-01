@@ -356,7 +356,7 @@ def login_session(uid):
     session["csrf"] = tok or secrets.token_hex(16); session["uid"] = uid; session.permanent = True
 
 def client_ip():
-    return (request.remote_addr or "?")[:64]
+    return ""  # IP desativado
 
 def log_event(kind, email="", until_ts=None, c=None):
     (c or db()).execute("INSERT INTO login_log(ts,ip,email,kind,until_ts) VALUES(?,?,?,?,?)", (now(), client_ip(), (email or "")[:120], kind, until_ts))
