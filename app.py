@@ -489,7 +489,7 @@ def uploads(name):
         logo_path = os.path.join(BASE, "static", "logo_wm.png")
         if os.path.exists(logo_path):
             logo = Image.open(logo_path).convert("RGBA")
-            lw = max(120, im.width // 6)
+            lw = max(200, im.width // 3)
             logo.thumbnail((lw, lw), Image.LANCZOS)
             pos = (im.width - logo.width - 15, im.height - logo.height - 15)
             im.paste(logo, pos, logo)
@@ -852,7 +852,7 @@ def process_image(data, fn):
             logo_path = os.path.join(BASE, "static", "logo_wm.png")
             if os.path.exists(logo_path):
                 logo = Image.open(logo_path).convert("RGBA")
-                lw = max(120, im.width // 6)
+                lw = max(200, im.width // 3)
                 logo.thumbnail((lw, lw), Image.LANCZOS)
                 pos = (im.width - logo.width - 15, im.height - logo.height - 15)
                 im.paste(logo, pos, logo)
