@@ -36,7 +36,7 @@ CAT_SLUG = {"Veículos": "veiculos", "Motos": "motos", "Caminhões": "caminhoes"
 GRUPOS = [("veiculos", "Veículos", "car", ["Veículos", "Motos", "Caminhões", "Sinistros/Sucatas"]),
           ("imoveis", "Imóveis", "building", ["Imóveis"]), ("materiais", "Materiais", "monitor", ["Materiais"])]
 GRUPO = {g[0]: g for g in GRUPOS}
-MOD_LABEL = {"Online": "SOMENTE ONLINE", "Presencial": "PRESENCIAL", "Online e presencial": "ONLINE E PRESENCIAL"}
+MOD_LABEL = {"Online": "ONLINE E PRESENCIAL", "Presencial": "PRESENCIAL", "Online e presencial": "ONLINE E PRESENCIAL"}
 WEEKDAYS = ["segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado", "domingo"]
 CAT_MAP = {}
 EXTS = {"jpg", "jpeg", "png", "webp", "gif"}
