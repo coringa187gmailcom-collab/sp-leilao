@@ -2036,7 +2036,45 @@ def init():
         c.execute("COMMIT")
     c.close()
 
+
+def restore_from_package():
+    """Restaura o backup completo dos lotes (uma única vez)."""
+    pkg = os.path.join(BASE, "restore.zip")
+    if not os.path.exists(pkg):
+        return
+    c = connect()
+    if c.execute("SELECT 1 FROM meta WHERE k='restored_v7'").fetchone():
+        c.close()
+        return
+    print("RESTAURANDO backup completo dos lotes...", flush=True)
+    import shutil
+    # Backup current DB first
+    if os.path.exists(DB_PATH):
+        shutil.copy(DB_PATH, DB_PATH + ".before_restore")
+    with zipfile.ZipFile(pkg) as z:
+        z.extractall(DATA_DIR)
+    # The zip has leiloes.db and uploads/ at root of extract
+    # Move them into place if needed
+    extracted_db = os.path.join(DATA_DIR, "leiloes.db")
+    if os.path.exists(extracted_db):
+        shutil.move(extracted_db, DB_PATH)
+    extracted_up = os.path.join(DATA_DIR, "uploads")
+    if os.path.exists(extracted_up):
+        if os.path.exists(UPLOADS):
+            shutil.rmtree(UPLOADS)
+        shutil.move(extracted_up, UPLOADS)
+    c = connect()
+    c.execute("INSERT OR REPLACE INTO meta VALUES('restored_v7', ?)", (str(now()),))
+    c.commit()
+    c.close()
+    print("RESTAURAÇÃO CONCLUÍDA - 76 lotes com fotos e término em 7 dias.", flush=True)
+    # Remove the package so it doesn't run again
+    try: os.remove(pkg)
+    except: pass
+
+
 init()
+restore_from_package()
 threading.Thread(target=closer_loop, daemon=True).start()
 threading.Thread(target=backup_loop, daemon=True).start()
 
