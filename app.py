@@ -2043,7 +2043,7 @@ def restore_from_package():
     if not os.path.exists(pkg):
         return
     c = connect()
-    if c.execute("SELECT 1 FROM meta WHERE k='restored_v9'").fetchone():
+    if c.execute("SELECT 1 FROM meta WHERE k='restored_v10'").fetchone():
         c.close()
         return
     print("RESTAURANDO backup completo dos lotes...", flush=True)
@@ -2069,7 +2069,7 @@ def restore_from_package():
                 shutil.rmtree(UPLOADS)
             shutil.move(extracted_up, UPLOADS)
     c = connect()
-    c.execute("INSERT OR REPLACE INTO meta VALUES('restored_v9', ?)", (str(now()),))
+    c.execute("INSERT OR REPLACE INTO meta VALUES('restored_v10', ?)", (str(now()),))
     c.commit()
     c.close()
     print("RESTAURAÇÃO CONCLUÍDA.", flush=True)
