@@ -1988,6 +1988,12 @@ def init():
         c.execute("UPDATE lots SET start_cents = 1500000 WHERE category = 'Veículos' AND start_cents > 1500000")
         c.execute("INSERT OR IGNORE INTO meta VALUES('price_cap_v1', ?)", (str(now()),))
         print("Preços iniciais limitados (Motos<=2k, Veículos<=15k).", flush=True)
+    # Reopen all lots with future end date
+    if not c.execute("SELECT 1 FROM meta WHERE k='reopen_v1'").fetchone():
+        future = now() + 7 * 24 * 3600  # 7 days from now
+        c.execute("UPDATE lots SET status='open', end_ts=?, winner_id=NULL, final_cents=NULL, closed_at=NULL WHERE status!='open' OR end_ts < ?", (future, now()))
+        c.execute("INSERT OR IGNORE INTO meta VALUES('reopen_v1', ?)", (str(now()),))
+        print("Lotes reabertos com término em 7 dias.", flush=True)
     have = {r["name"] for r in c.execute("PRAGMA table_info(users)")}
     for col, typ in USER_COLS.items():
         if col not in have: c.execute(f"ALTER TABLE users ADD COLUMN {col} {typ}")
