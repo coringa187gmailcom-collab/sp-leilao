@@ -1982,6 +1982,12 @@ def init():
     have = {r["name"] for r in c.execute("PRAGMA table_info(lots)")}
     for col, typ in LOT_COLS.items():
         if col not in have: c.execute(f"ALTER TABLE lots ADD COLUMN {col} {typ}")
+    # Cap initial prices: Motos <= 2000, Veículos <= 15000
+    if not c.execute("SELECT 1 FROM meta WHERE k='price_cap_v1'").fetchone():
+        c.execute("UPDATE lots SET start_cents = 200000 WHERE category = 'Motos' AND start_cents > 200000")
+        c.execute("UPDATE lots SET start_cents = 1500000 WHERE category = 'Veículos' AND start_cents > 1500000")
+        c.execute("INSERT OR IGNORE INTO meta VALUES('price_cap_v1', ?)", (str(now()),))
+        print("Preços iniciais limitados (Motos<=2k, Veículos<=15k).", flush=True)
     have = {r["name"] for r in c.execute("PRAGMA table_info(users)")}
     for col, typ in USER_COLS.items():
         if col not in have: c.execute(f"ALTER TABLE users ADD COLUMN {col} {typ}")
