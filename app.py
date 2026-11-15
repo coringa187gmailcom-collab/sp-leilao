@@ -2043,33 +2043,36 @@ def restore_from_package():
     if not os.path.exists(pkg):
         return
     c = connect()
-    # Force re-restore (temporary)
-    # if c.execute("SELECT 1 FROM meta WHERE k='restored_v8'").fetchone():
-    #     c.close()
-    #     return
+    if c.execute("SELECT 1 FROM meta WHERE k='restored_v9'").fetchone():
+        c.close()
+        return
     print("RESTAURANDO backup completo dos lotes...", flush=True)
     import shutil
     # Backup current DB first
     if os.path.exists(DB_PATH):
         shutil.copy(DB_PATH, DB_PATH + ".before_restore")
-    with zipfile.ZipFile(pkg) as z:
-        z.extractall(DATA_DIR)
-    # The zip has leiloes.db and uploads/ at root of extract
-    # Move them into place if needed
-    extracted_db = os.path.join(DATA_DIR, "leiloes.db")
-    if os.path.exists(extracted_db):
-        shutil.move(extracted_db, DB_PATH)
-    extracted_up = os.path.join(DATA_DIR, "uploads")
-    if os.path.exists(extracted_up):
-        if os.path.exists(UPLOADS):
-            shutil.rmtree(UPLOADS)
-        shutil.move(extracted_up, UPLOADS)
+    # Extract to a temp dir first to avoid path conflicts
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        with zipfile.ZipFile(pkg) as z:
+            z.extractall(tmp)
+        # Move DB
+        extracted_db = os.path.join(tmp, "leiloes.db")
+        if os.path.exists(extracted_db):
+            if os.path.exists(DB_PATH):
+                os.remove(DB_PATH)
+            shutil.move(extracted_db, DB_PATH)
+        # Move uploads
+        extracted_up = os.path.join(tmp, "uploads")
+        if os.path.exists(extracted_up):
+            if os.path.exists(UPLOADS):
+                shutil.rmtree(UPLOADS)
+            shutil.move(extracted_up, UPLOADS)
     c = connect()
-    c.execute("INSERT OR REPLACE INTO meta VALUES('restored_v8', ?)", (str(now()),))
+    c.execute("INSERT OR REPLACE INTO meta VALUES('restored_v9', ?)", (str(now()),))
     c.commit()
     c.close()
-    print("RESTAURAÇÃO CONCLUÍDA - 76 lotes com fotos e término em 7 dias.", flush=True)
-    # Remove the package so it doesn't run again
+    print("RESTAURAÇÃO CONCLUÍDA.", flush=True)
     try: os.remove(pkg)
     except: pass
 
