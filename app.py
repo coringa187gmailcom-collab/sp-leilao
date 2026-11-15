@@ -2054,15 +2054,15 @@ def restore_from_package():
     with zipfile.ZipFile(pkg) as z:
         z.extractall(DATA_DIR)
     # The zip has leiloes.db and uploads/ at root of extract
+    # Move them into place if needed
     extracted_db = os.path.join(DATA_DIR, "leiloes.db")
-    if os.path.exists(extracted_db) and extracted_db != DB_PATH:
+    if os.path.exists(extracted_db):
         shutil.move(extracted_db, DB_PATH)
     extracted_up = os.path.join(DATA_DIR, "uploads")
-    if os.path.exists(extracted_up) and os.path.abspath(extracted_up) != os.path.abspath(UPLOADS):
+    if os.path.exists(extracted_up):
         if os.path.exists(UPLOADS):
             shutil.rmtree(UPLOADS)
         shutil.move(extracted_up, UPLOADS)
-    # If extracted_up is already at UPLOADS (same path), nothing to do
     c = connect()
     c.execute("INSERT OR REPLACE INTO meta VALUES('restored_v7', ?)", (str(now()),))
     c.commit()
@@ -2075,6 +2075,23 @@ def restore_from_package():
 
 init()
 restore_from_package()
+# Re-run migrations after restore (backup may have older schema)
+c = connect()
+have = {r["name"] for r in c.execute("PRAGMA table_info(lots)")}
+for col, typ in LOT_COLS.items():
+    if col not in have:
+        c.execute(f"ALTER TABLE lots ADD COLUMN {col} {typ}")
+have = {r["name"] for r in c.execute("PRAGMA table_info(users)")}
+for col, typ in USER_COLS.items():
+    if col not in have:
+        c.execute(f"ALTER TABLE users ADD COLUMN {col} {typ}")
+have = {r["name"] for r in c.execute("PRAGMA table_info(auctions)")}
+for col, typ in AUC_COLS.items():
+    if col not in have:
+        c.execute(f"ALTER TABLE auctions ADD COLUMN {col} {typ}")
+c.commit()
+c.close()
+print("Migrações pós-restauração aplicadas.", flush=True)
 threading.Thread(target=closer_loop, daemon=True).start()
 threading.Thread(target=backup_loop, daemon=True).start()
 
