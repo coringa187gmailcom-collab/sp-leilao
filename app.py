@@ -2043,9 +2043,10 @@ def restore_from_package():
     if not os.path.exists(pkg):
         return
     c = connect()
-    if c.execute("SELECT 1 FROM meta WHERE k='restored_v7'").fetchone():
-        c.close()
-        return
+    # Force re-restore (temporary)
+    # if c.execute("SELECT 1 FROM meta WHERE k='restored_v8'").fetchone():
+    #     c.close()
+    #     return
     print("RESTAURANDO backup completo dos lotes...", flush=True)
     import shutil
     # Backup current DB first
@@ -2064,7 +2065,7 @@ def restore_from_package():
             shutil.rmtree(UPLOADS)
         shutil.move(extracted_up, UPLOADS)
     c = connect()
-    c.execute("INSERT OR REPLACE INTO meta VALUES('restored_v7', ?)", (str(now()),))
+    c.execute("INSERT OR REPLACE INTO meta VALUES('restored_v8', ?)", (str(now()),))
     c.commit()
     c.close()
     print("RESTAURAÇÃO CONCLUÍDA - 76 lotes com fotos e término em 7 dias.", flush=True)
