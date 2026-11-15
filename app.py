@@ -2054,15 +2054,15 @@ def restore_from_package():
     with zipfile.ZipFile(pkg) as z:
         z.extractall(DATA_DIR)
     # The zip has leiloes.db and uploads/ at root of extract
-    # Move them into place if needed
     extracted_db = os.path.join(DATA_DIR, "leiloes.db")
-    if os.path.exists(extracted_db):
+    if os.path.exists(extracted_db) and extracted_db != DB_PATH:
         shutil.move(extracted_db, DB_PATH)
     extracted_up = os.path.join(DATA_DIR, "uploads")
-    if os.path.exists(extracted_up):
+    if os.path.exists(extracted_up) and os.path.abspath(extracted_up) != os.path.abspath(UPLOADS):
         if os.path.exists(UPLOADS):
             shutil.rmtree(UPLOADS)
         shutil.move(extracted_up, UPLOADS)
+    # If extracted_up is already at UPLOADS (same path), nothing to do
     c = connect()
     c.execute("INSERT OR REPLACE INTO meta VALUES('restored_v7', ?)", (str(now()),))
     c.commit()
