@@ -13,7 +13,18 @@
 <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/app.css?v={{VERSION}}">{% block head %}{% endblock %}</head><body class="{% block bodycls %}{% endblock %}">
+<link rel="stylesheet" href="/static/app.css?v={{VERSION}}">{% block head %}{% endblock %}
+{% if request.args.get('lead') == '1' %}
+<!-- Event snippet for Enviar formulário de lead conversion -->
+<script>
+  gtag('event', 'conversion', {
+      'send_to': 'AW-18507501665/B_44CICvtpkdEOGgiPlE',
+      'value': 1.0,
+      'currency': 'USD'
+  });
+</script>
+{% endif %}
+</head><body class="{% block bodycls %}{% endblock %}">
 <header class="hd2"><div class="wrap hrow">
 <a class="brand" href="/" aria-label="{{cfg.empresa}} — início">{{logo_mark(40)}}{{wordmark()}}</a>
 <nav class="dnav"><a href="/leiloes">Leilões</a><a href="/agenda">Agenda</a><a href="/lotes">Lotes</a><a href="/como-funciona">Como participar</a>

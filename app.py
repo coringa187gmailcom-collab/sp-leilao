@@ -1031,7 +1031,7 @@ def register():
                            (name, email, generate_password_hash(pw), phone, now(), now()))
         login_session(cur.lastrowid)
         flash(f"Bem-vindo(a), {short_name(name)}! Conta criada. Você já pode entrar.", "ok")
-        return redirect(url_for("index"))
+        return redirect(url_for("index") + "?lead=1")
     return render_template("auth.html", mode="cadastro", f={})
 
 def safe_next(nxt):
