@@ -1,4 +1,13 @@
-{% from "_brand.html" import logo_mark, wordmark %}<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+{% from "_brand.html" import logo_mark, wordmark %}<!doctype html><html lang="pt-BR"><head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18507501665"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-18507501665');
+</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{% block title %}{{cfg.empresa}} — leilões online de veículos, imóveis e materiais{% endblock %}</title><meta name="theme-color" content="#17181c">
 <meta name="description" content="{{cfg.empresa}}: leilões online de veículos, motos, caminhões, imóveis e materiais. Cadastre-se, habilite-se e dê seus lances.">
 <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
