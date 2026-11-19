@@ -14,8 +14,8 @@
 <div class="row2"><div><label>Avaliação (R$, opcional)</label><input name="avaliacao" inputmode="decimal" value="{{('%.2f'|format(l.appraisal_cents/100))|replace('.',',') if l.appraisal_cents else ''}}"></div><div><label>Comissão do leiloeiro (%)</label><input name="comissao" inputmode="decimal" value="{{'%g'|format(l.commission_pct or 0)}}"></div></div>
 <label>Taxas</label><input name="taxas" value="{{l.fees or ''}}">
 <label>Término atual: {{l.end_ts|dt}}</label>
-{% if not locked %}<select name="duracao"><option value="">Manter / escolher data abaixo</option><option value="5">Daqui a 5 minutos</option><option value="60">Daqui a 1 hora</option><option value="1440">Daqui a 1 dia</option><option value="10080">Daqui a 7 dias</option></select>
-<label class="muted">Nova data e hora (horário de Brasília)</label><input type="datetime-local" name="termino">{% endif %}
+<select name="duracao"><option value="">Manter / escolher data abaixo</option><option value="5">Daqui a 5 minutos</option><option value="60">Daqui a 1 hora</option><option value="1440">Daqui a 1 dia</option><option value="10080">Daqui a 7 dias</option></select>
+<label class="muted">Nova data e hora (horário de Brasília)</label><input type="datetime-local" name="termino">
 <label>Fotos atuais</label>{% if photos %}<div class="fotos-atuais">{% for p in photos %}<div class="foto-atual"><img src="/uploads/{{p.filename}}" alt="">
 <label class="opt"><input type="radio" name="capa" value="e{{p.id}}" {{'checked' if loop.first}}> ★ Capa</label>
 <label class="opt"><input type="checkbox" name="remover_foto" value="{{p.id}}"> Remover</label></div>{% endfor %}</div>{% else %}<p class="muted">Sem fotos.</p>{% endif %}
