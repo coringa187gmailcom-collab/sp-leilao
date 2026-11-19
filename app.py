@@ -933,9 +933,12 @@ def edit_lot(lid):
         title = (f.get("titulo") or "").strip()[:120]
         cat = f.get("categoria") if f.get("categoria") in CATEGORIAS else l["category"]
         start, inc, end_ts = l["start_cents"], l["inc_cents"], l["end_ts"]
+        # Admin can always update end date
+        if f.get("duracao") or f.get("termino"):
+            new_end = parse_end(f)
+            if new_end: end_ts = new_end
         if not locked:
             start = parse_money(f.get("lance_inicial")); inc = parse_money(f.get("incremento"))
-            if f.get("duracao") or f.get("termino"): end_ts = parse_end(f)
         if len(title) < 3: err = "Informe um título."
         elif not start or not inc: err = "Informe lance inicial e incremento."
         elif not locked and (not end_ts or end_ts < now() + 120): err = "O término precisa ser pelo menos 2 minutos à frente."
