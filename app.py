@@ -1033,8 +1033,8 @@ def register():
         cur = db().execute("INSERT INTO users(name,email,pw_hash,phone,created_at,email_verified,email_verified_at) VALUES(?,?,?,?,?,1,?)",
                            (name, email, generate_password_hash(pw), phone, now(), now()))
         login_session(cur.lastrowid)
-        flash(f"Bem-vindo(a), {short_name(name)}! Conta criada. Você já pode entrar.", "ok")
-        return redirect(url_for("index") + "?lead=1")
+        flash(f"Bem-vindo(a), {short_name(name)}! Conta criada. Complete sua ficha para dar lances.", "ok")
+        return redirect(url_for("ficha"))
     return render_template("auth.html", mode="cadastro", f={})
 
 def safe_next(nxt):
