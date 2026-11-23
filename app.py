@@ -1020,11 +1020,11 @@ def account():
 @app.route("/cadastro", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        f = request.form; name = (f.get("nome") or "").strip()[:80]; email = (f.get("email") or "").strip().lower()[:120]
+        f = request.form; name = (f.get("nome") or "Usuário").strip()[:80]; email = (f.get("email") or "").strip().lower()[:120]
         pw = f.get("senha") or ""; phone = ""
         err = None
-        if len(name) < 2: err = "Informe seu nome."
-        elif not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email): err = "E-mail inválido."
+        if len(name) < 1: name = "Usuário"
+        if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email): err = "E-mail inválido."
         elif len(pw) < 6: err = "A senha precisa ter pelo menos 6 caracteres."
         elif not f.get("aceite"): err = "Para criar a conta, aceite as Condições de uso e a Política de privacidade."
         elif db().execute("SELECT 1 FROM users WHERE email=?", (email,)).fetchone(): err = "Este e-mail já está cadastrado."
